@@ -23,6 +23,7 @@ void Segment::OnPreEndLevel()
 {
 	_energy->GetElementValue(0, 0, &(this->points));
 	this->segment = 0;
+	m_bml->SendIngameMessage("Finished!");
 	Print(m_bml);
 	m_bml->SendIngameMessage("----------");
 	this->srTime = 0;
