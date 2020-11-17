@@ -26,7 +26,7 @@ public:
 	virtual CKSTRING GetVersion() override { return SEG_VERSION; }
 	virtual CKSTRING GetName() override { return "Segment"; }
 	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
-	virtual CKSTRING GetDescription() override { return "A mod to display performance splitted into each segment."; }
+	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance split into each segment."; }
 	DECLARE_BML_VERSION;
 
 	virtual void OnPreEndLevel() override;
