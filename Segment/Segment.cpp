@@ -62,11 +62,13 @@ void Segment::OnStartLevel()
 	this->_currentLevel = m_bml->GetArrayByName("CurrentLevel");
 	int currentLevel;
 	this->_currentLevel->GetElementValue(0, 0, &currentLevel);
+	m_bml->SendIngameMessage("----------");
 	std::stringstream ss;
 	ss << "Starting level " << currentLevel << "...";
 	m_bml->SendIngameMessage(ss.str().c_str());
 	this->counting = false;
 	this->srTime = 0;
+	this->segment = 0;
 }
 
 void Segment::OnPreCheckpointReached()
