@@ -12,14 +12,21 @@ extern "C" {
 class Segment: public IMod
 {
 private:
+	const float TITLE_SPACING = 0.05f;
+	const float ITEM_SPACING = 0.03f;
+	const float TITLE_X_POS = 0.0f;
+	const float TITLE_Y_POS = 0.1f;
 	double srTime = 0;
 	int points;
 	int segment = 0;
 	bool counting;
 	CKDataArray* _energy;
 	CKDataArray* _currentLevel;
+	BGui::Gui* _gui = nullptr;
+	BGui::Label* _title = nullptr;
+	int _segmentCount = 0;
+	std::vector<BGui::Label*> _segments;
 	void Print(IBML* bml) const;
-
 public:
 	Segment(IBML* bml): IMod(bml) {}
 	virtual CKSTRING GetID() override { return "Segment"; }
@@ -37,5 +44,8 @@ public:
 	virtual void OnProcess() override;
 	virtual void OnStartLevel() override;
 	virtual void OnPreCheckpointReached() override;
+	virtual void OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
+		BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
+		XObjectArray* objArray, CKObject* masterObj);
 };
 
