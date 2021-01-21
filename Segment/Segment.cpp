@@ -24,41 +24,39 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 	XObjectArray* objArray, CKObject* masterObj) {
 	_gui = new BGui::Gui;
-	auto _title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
-	_title->SetAlignment(ALIGN_TOPLEFT);
-	_title->SetVisible(true);
-	_title = _gui->AddTextLabel("M_Segment_Title", "#1:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_SPACING, 0.2f, 0.03f);
-	_title->SetAlignment(ALIGN_TOPLEFT);
-	_title->SetVisible(true);
-	_title = _gui->AddTextLabel("M_Segment_Title", "#2:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_SPACING + 1.0 * ITEM_SPACING, 0.2f, 0.03f);
-	_title->SetAlignment(ALIGN_TOPLEFT);
-	_title->SetVisible(true);
-	_title = _gui->AddTextLabel("M_Segment_Title", "#3:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_SPACING + 2.0 * ITEM_SPACING, 0.2f, 0.03f);
-	_title->SetAlignment(ALIGN_TOPLEFT);
-	_title->SetVisible(true);
-	_title = _gui->AddTextLabel("M_Segment_Title", "#4:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_SPACING + 3.0 * ITEM_SPACING, 0.2f, 0.03f);
-	_title->SetAlignment(ALIGN_TOPLEFT);
-	_title->SetVisible(true);
+	
+	_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+	_title->SetAlignment(ALIGN_LEFT);
+	_title->SetVisible(false);
 
-	if (strlen(filename) == 30 && filename[18] == 'L' && filename[19] == 'e' && filename[23] == '_') {
-		for (int i = 1; i <= 9; i++) {
-			std::stringstream ss;
-			ss << "Sector_" << std::setfill('0') << std::setw(2) << i;
-			//sprintf(groupName, "Sector_%02d", i);
-			//auto test = m_bml->GetGroupByName(groupName);
-			auto group = m_bml->GetGroupByName(ss.str().c_str());
-			if (m_bml->GetGroupByName(ss.str().c_str()) == nullptr) 
-				break;
-			
-			_segmentCount = i;
-			//m_bml->SendIngameMessage("sector 01");
-
-		}
-
-		std::stringstream ss;
-		ss << "Sector count: " << _segmentCount;
-		m_bml->SendIngameMessage(ss.str().c_str());
+	for (int i = 1; i <= 9; i++) {
+		//BGui::Label* label[3];
+		_segments[i-1][0] = _gui->AddTextLabel("M_Segment_Seq", "#1:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float) i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_segments[i-1][0]->SetAlignment(ALIGN_LEFT);
+		_segments[i-1][0]->SetVisible(false);
+		_segments[i-1][1] = _gui->AddTextLabel("M_Segment_Time", "00.000s", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_segments[i-1][1]->SetAlignment(ALIGN_CENTER);
+		_segments[i-1][1]->SetVisible(false);
+		_segments[i-1][2] = _gui->AddTextLabel("M_Segment_Score", "1234", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_segments[i-1][2]->SetAlignment(ALIGN_CENTER);
+		_segments[i-1][2]->SetVisible(false);
 	}
+
+	if (!(strlen(filename) == 30 && filename[18] == 'L' && filename[19] == 'e' && filename[23] == '_'))
+		return;
+	for (int i = 1; i <= 9; i++) {
+		std::stringstream ss;
+		ss << "Sector_" << std::setfill('0') << std::setw(2) << i;
+		auto group = m_bml->GetGroupByName(ss.str().c_str());
+		if (m_bml->GetGroupByName(ss.str().c_str()) == nullptr)
+			break;
+
+		_segmentCount = i;
+	}
+
+	std::stringstream ss;
+	ss << "Sector count: " << _segmentCount;
+	m_bml->SendIngameMessage(ss.str().c_str());
 }
 
 void Segment::OnPreEndLevel()
@@ -113,7 +111,13 @@ void Segment::OnStartLevel()
 	this->counting = false;
 	this->srTime = 0;
 	this->segment = 0;
-	
+
+	_title->SetVisible(true);
+	for (int i = 0; i < _segmentCount; i++) {
+		_segments[i][0]->SetVisible(true);
+		_segments[i][1]->SetVisible(true);
+		_segments[i][2]->SetVisible(true);
+	}
 }
 
 void Segment::OnPreCheckpointReached()

@@ -12,10 +12,14 @@ extern "C" {
 class Segment: public IMod
 {
 private:
-	const float TITLE_SPACING = 0.05f;
-	const float ITEM_SPACING = 0.03f;
-	const float TITLE_X_POS = 0.0f;
-	const float TITLE_Y_POS = 0.1f;
+	const float TITLE_X_POS = 0.0f; // Title position (Segments)
+	const float TITLE_Y_POS = 0.05f; 
+
+	const float TITLE_Y_SHIFT = 0.03f; // Between title & first row
+	const float ITEM_Y_SHIFT = 0.03f; // Between rows
+	const float TITLE_X_SHIFT = 0.03f; // Between heading (#n) & first col
+	const float ITEM_X_SHIFT = 0.10f; // Between cols
+
 	double srTime = 0;
 	int points;
 	int segment = 0;
@@ -25,7 +29,7 @@ private:
 	BGui::Gui* _gui = nullptr;
 	BGui::Label* _title = nullptr;
 	int _segmentCount = 0;
-	std::vector<BGui::Label*> _segments;
+	BGui::Label* _segments[9][3];
 	void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}
