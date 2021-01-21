@@ -15,7 +15,7 @@ private:
 	const float TITLE_X_POS = 0.0f; // Title position (Segments)
 	const float TITLE_Y_POS = 0.05f; 
 
-	const float TITLE_Y_SHIFT = 0.03f; // Between title & first row
+	const float TITLE_Y_SHIFT = 0.01f; // Between title & first row
 	const float ITEM_Y_SHIFT = 0.03f; // Between rows
 	const float TITLE_X_SHIFT = 0.03f; // Between heading (#n) & first col
 	const float ITEM_X_SHIFT = 0.10f; // Between cols

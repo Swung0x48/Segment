@@ -29,15 +29,16 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	_title->SetAlignment(ALIGN_LEFT);
 	_title->SetVisible(false);
 
+	char labelText[5] = "#1: ";
 	for (int i = 1; i <= 9; i++) {
-		//BGui::Label* label[3];
-		_segments[i-1][0] = _gui->AddTextLabel("M_Segment_Seq", "#1:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float) i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		labelText[1] = i + '0';
+		_segments[i-1][0] = _gui->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float) i * ITEM_Y_SHIFT, 0.2f, 0.03f);
 		_segments[i-1][0]->SetAlignment(ALIGN_LEFT);
 		_segments[i-1][0]->SetVisible(false);
-		_segments[i-1][1] = _gui->AddTextLabel("M_Segment_Time", "00.000s", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_segments[i-1][1] = _gui->AddTextLabel("M_Segment_Time", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
 		_segments[i-1][1]->SetAlignment(ALIGN_CENTER);
 		_segments[i-1][1]->SetVisible(false);
-		_segments[i-1][2] = _gui->AddTextLabel("M_Segment_Score", "1234", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_segments[i-1][2] = _gui->AddTextLabel("M_Segment_Score", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
 		_segments[i-1][2]->SetAlignment(ALIGN_CENTER);
 		_segments[i-1][2]->SetVisible(false);
 	}
@@ -57,6 +58,8 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	std::stringstream ss;
 	ss << "Sector count: " << _segmentCount;
 	m_bml->SendIngameMessage(ss.str().c_str());
+
+	this->srTime = 0;
 }
 
 void Segment::OnPreEndLevel()
@@ -66,7 +69,6 @@ void Segment::OnPreEndLevel()
 	m_bml->SendIngameMessage("Finished!");
 	Print(m_bml);
 	m_bml->SendIngameMessage("----------");
-	this->srTime = 0;
 	this->counting = false;
 }
 
@@ -92,10 +94,17 @@ void Segment::OnUnpauseLevel()
 
 void Segment::OnProcess()
 {
-	_gui->Process();
-
 	if (this->counting)
 		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
+
+	char timeString[10];
+	sprintf_s(timeString, "%2.3fs", srTime / 1000.0f);
+
+	if (m_bml->IsIngame())
+		assert(segment < _segmentCount);
+
+	_segments[segment][1]->SetText(timeString);
+	_gui->Process();
 }
 
 void Segment::OnStartLevel()
@@ -118,6 +127,11 @@ void Segment::OnStartLevel()
 		_segments[i][1]->SetVisible(true);
 		_segments[i][2]->SetVisible(true);
 	}
+	_segments[0][1]->SetText("00.000s");
+	_energy->GetElementValue(0, 0, &(this->points));
+	//char buf[5];
+	//sprintf_s(buf, "%04d", points);
+	//_segments[0][2]->SetText(buf);
 }
 
 void Segment::OnPreCheckpointReached()
@@ -125,4 +139,5 @@ void Segment::OnPreCheckpointReached()
 	_energy->GetElementValue(0, 0, &(this->points));
 	++this->segment;
 	Print(m_bml);
+	srTime = 0;
 }
