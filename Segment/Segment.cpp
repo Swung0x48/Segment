@@ -1,6 +1,5 @@
 #include "Segment.h"
 #include <iomanip>
-#include <sstream>
 
 IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
