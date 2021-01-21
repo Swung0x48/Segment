@@ -1,8 +1,8 @@
 #pragma once
 #include <BML/BMLAll.h>
-constexpr int SEG_MAJOR_VER = 0;
-constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 2;
+constexpr int SEG_MAJOR_VER = 1;
+constexpr int SEG_MINOR_VER = 0;
+constexpr int SEG_PATCH_VER = 0;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -30,7 +30,7 @@ private:
 	BGui::Label* _title = nullptr;
 	int _segmentCount = 0;
 	BGui::Label* _labels[9][3];
-	float _segmentTime[9];
+	double _segmentTime[9];
 	void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}

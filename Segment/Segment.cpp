@@ -72,8 +72,9 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 void Segment::OnPreEndLevel()
 {
 	_segmentTime[segment] = srTime;
+	segment++;
 	//_energy->GetElementValue(0, 0, &(this->points));
-	this->segment = 0;
+	//this->segment = 0;
 	//m_bml->SendIngameMessage("Finished!");
 	//Print(m_bml);
 	//m_bml->SendIngameMessage("----------");
@@ -106,7 +107,7 @@ void Segment::OnProcess()
 		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
 	
 	if (m_bml->IsIngame())
-		assert(segment < _segmentCount);
+		assert(segment <= _segmentCount);
 
 	char timeString[10];
 	sprintf_s(timeString, "%2.3fs", srTime / 1000.0f);
@@ -152,7 +153,8 @@ void Segment::OnStartLevel()
 void Segment::OnPreCheckpointReached()
 {
 	//_energy->GetElementValue(0, 0, &(this->points));
-	_segmentTime[segment] = srTime;
+	if (_segmentTime[segment] == 0.0f || srTime < _segmentTime[segment])
+		_segmentTime[segment] = srTime;
 	this->segment++;
 	//Print(m_bml);
 	srTime = 0;
