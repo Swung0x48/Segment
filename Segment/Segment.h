@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 0;
+constexpr int SEG_PATCH_VER = 2;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -13,12 +13,14 @@ class Segment: public IMod
 {
 private:
 	const float TITLE_X_POS = 0.0f; // Title position (Segments)
-	const float TITLE_Y_POS = 0.05f; 
+	const float TITLE_Y_POS = 0.05f;
+	const float PANEL_INIT_Y_POS = 0.085f; // Panel position (highlight background)
 
 	const float TITLE_Y_SHIFT = 0.01f; // Between title & first row
 	const float ITEM_Y_SHIFT = 0.03f; // Between rows
 	const float TITLE_X_SHIFT = 0.02f; // Between heading (#n) & first col
 	const float ITEM_X_SHIFT = 0.14f; // Between cols
+	const float PANEL_Y_SHIFT = 0.03f; // Panel movement
 
 	double srTime = 0;
 	int points;
@@ -28,6 +30,7 @@ private:
 	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
 	BGui::Label* _title = nullptr;
+	BGui::Panel* _panel = nullptr;
 	int _segmentCount = 0;
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
@@ -41,6 +44,7 @@ public:
 	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance splitted into each segment."; }
 	DECLARE_BML_VERSION;
 
+	virtual void OnPreStartMenu() override;
 	virtual void OnPreEndLevel() override;
 	virtual void OnCounterActive() override;
 	virtual void OnCounterInactive() override;

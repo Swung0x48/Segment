@@ -6,7 +6,7 @@ IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
 }
 
-void Segment::Print(IBML* bml) const
+/*void Segment::Print(IBML* bml) const
 {
 	std::stringstream ss;
 	if (segment != 0) {
@@ -18,14 +18,22 @@ void Segment::Print(IBML* bml) const
 	bml->SendIngameMessage(ss.str().c_str()); ss.str("");
 	ss << "Time: " << this->srTime / 1000.0 << "s";
 	bml->SendIngameMessage(ss.str().c_str()); ss.str("");
+}*/
+
+void Segment::OnPreStartMenu() {
+	_panel->SetVisible(false);
 }
 
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
 	BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 	XObjectArray* objArray, CKObject* masterObj) {
 	_gui = new BGui::Gui;
-	
+	_panel = _gui->AddPanel("M_Segment_Bg", VxColor(255, 168, 0, 200), TITLE_X_POS, PANEL_INIT_Y_POS, 0.35f, 0.03f);
+	_panel->SetZOrder(0);
+	//_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + 1.0 * PANEL_Y_SHIFT));
+	_panel->SetVisible(false);
 	_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+	_title->SetZOrder(10);
 	_title->SetAlignment(ALIGN_LEFT);
 	_title->SetVisible(false);
 
@@ -73,6 +81,7 @@ void Segment::OnPreEndLevel()
 {
 	_segmentTime[segment] = srTime;
 	segment++;
+	_panel->SetVisible(false);
 	//_energy->GetElementValue(0, 0, &(this->points));
 	//this->segment = 0;
 	//m_bml->SendIngameMessage("Finished!");
@@ -114,10 +123,21 @@ void Segment::OnProcess()
 	_labels[segment][1]->SetText(timeString);
 
 	char deltaString[10];
-	if (_segmentTime[segment] != 0.0f) {
-		double delta = srTime - _segmentTime[segment];
+
+	double currentTime = _segmentTime[segment];
+	if (currentTime == 0.0f)
+		_panel->SetColor(VxColor(255, 168, 0, 200));
+	else {
+		double delta = srTime - currentTime;
 		sprintf_s(deltaString, "%+2.3fs", delta / 1000.0f);
 		_labels[segment][2]->SetText(deltaString);
+		
+		if (delta < 0.0f)
+			_panel->SetColor(VxColor(50, 205, 50, 200));
+		else if (delta == 0.0f)
+			_panel->SetColor(VxColor(255, 168, 0, 200));
+		else
+			_panel->SetColor(VxColor(220, 20, 60, 200));
 	}
 
 	_gui->Process();
@@ -138,6 +158,8 @@ void Segment::OnStartLevel()
 	this->segment = 0;
 
 	_title->SetVisible(true);
+	_panel->SetVisible(true);
+	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + (float)segment * PANEL_Y_SHIFT));
 	for (int i = 0; i < _segmentCount; i++) {
 		_labels[i][0]->SetVisible(true);
 		_labels[i][1]->SetVisible(true);
@@ -156,6 +178,7 @@ void Segment::OnPreCheckpointReached()
 	if (_segmentTime[segment] == 0.0f || srTime < _segmentTime[segment])
 		_segmentTime[segment] = srTime;
 	this->segment++;
+	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + (float)segment * PANEL_Y_SHIFT));
 	//Print(m_bml);
 	srTime = 0;
 }
