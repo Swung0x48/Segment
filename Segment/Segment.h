@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 5;
+constexpr int SEG_PATCH_VER = 6;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -35,6 +35,7 @@ private:
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
 	IProperty* _props[1];
+	bool _enabled = true;
 	//void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}
@@ -46,6 +47,7 @@ public:
 	DECLARE_BML_VERSION;
 
 	virtual void OnLoad() override;
+	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
 	virtual void OnPreStartMenu() override;
 	virtual void OnPreEndLevel() override;
 	virtual void OnCounterActive() override;

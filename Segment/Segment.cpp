@@ -24,6 +24,20 @@ void Segment::OnLoad() {
 	_props[0] = GetConfig()->GetProperty("General", "Enabled?");
 	_props[0]->SetComment("Enable Segment");
 	_props[0]->SetDefaultBoolean(true);
+
+	_enabled = _props[0]->GetBoolean();
+}
+
+void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
+	if (prop == _props[0] && m_bml->IsIngame()) {
+		_title->SetVisible(_enabled);
+		_panel->SetVisible(_enabled);
+		for (int i = 0; i < _segmentCount; i++) {
+			_labels[i][0]->SetVisible(_enabled);
+			_labels[i][1]->SetVisible(_enabled);
+			_labels[i][2]->SetVisible(_enabled);
+		}
+	}
 }
 
 void Segment::OnPreStartMenu() {
@@ -121,32 +135,32 @@ void Segment::OnProcess()
 	if (this->counting)
 		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
 	
-	if (m_bml->IsIngame())
+	if (m_bml->IsIngame()) {
 		assert(segment <= _segmentCount);
 
-	char timeString[10];
-	sprintf_s(timeString, "%2.3fs", srTime / 1000.0f);
-	_labels[segment][1]->SetText(timeString);
+		char timeString[10];
+		sprintf_s(timeString, "%2.3fs", srTime / 1000.0f);
+		_labels[segment][1]->SetText(timeString);
 
-	char deltaString[10];
-
-	double currentTime = _segmentTime[segment];
-	if (currentTime == 0.0f)
-		_panel->SetColor(VxColor(255, 168, 0, 200));
-	else {
-		double delta = srTime - currentTime;
-		sprintf_s(deltaString, "%+2.3fs", delta / 1000.0f);
-		_labels[segment][2]->SetText(deltaString);
-		
-		if (delta < 0.0f)
-			_panel->SetColor(VxColor(50, 205, 50, 200));
-		else if (delta == 0.0f)
+		char deltaString[10];
+		double currentTime = _segmentTime[segment];
+		if (currentTime == 0.0f)
 			_panel->SetColor(VxColor(255, 168, 0, 200));
-		else
-			_panel->SetColor(VxColor(220, 20, 60, 200));
-	}
+		else {
+			double delta = srTime - currentTime;
+			sprintf_s(deltaString, "%+2.3fs", delta / 1000.0f);
+			_labels[segment][2]->SetText(deltaString);
 
-	_gui->Process();
+			if (delta < 0.0f)
+				_panel->SetColor(VxColor(50, 205, 50, 200));
+			else if (delta == 0.0f)
+				_panel->SetColor(VxColor(255, 168, 0, 200));
+			else
+				_panel->SetColor(VxColor(220, 20, 60, 200));
+		}
+
+		_gui->Process();
+	}
 }
 
 void Segment::OnStartLevel()
@@ -163,13 +177,13 @@ void Segment::OnStartLevel()
 	this->srTime = 0;
 	this->segment = 0;
 
-	_title->SetVisible(_props[0]->GetBoolean());
-	_panel->SetVisible(_props[0]->GetBoolean());
+	_title->SetVisible(_enabled);
+	_panel->SetVisible(_enabled);
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + (float)segment * PANEL_Y_SHIFT));
 	for (int i = 0; i < _segmentCount; i++) {
-		_labels[i][0]->SetVisible(_props[0]->GetBoolean());
-		_labels[i][1]->SetVisible(_props[0]->GetBoolean());
-		_labels[i][2]->SetVisible(_props[0]->GetBoolean());
+		_labels[i][0]->SetVisible(_enabled);
+		_labels[i][1]->SetVisible(_enabled);
+		_labels[i][2]->SetVisible(_enabled);
 	}
 	_labels[0][1]->SetText("00.000s");
 	//_energy->GetElementValue(0, 0, &(this->points));
