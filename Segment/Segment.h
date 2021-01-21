@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 6;
+constexpr int SEG_PATCH_VER = 7;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -26,7 +26,6 @@ private:
 	int points;
 	int segment = 0;
 	bool counting;
-	//CKDataArray* _energy;
 	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
 	BGui::Label* _title = nullptr;
@@ -36,7 +35,6 @@ private:
 	double _segmentTime[9];
 	IProperty* _props[1];
 	bool _enabled = true;
-	//void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}
 	virtual CKSTRING GetID() override { return "Segment"; }

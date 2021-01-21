@@ -6,19 +6,6 @@ IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
 }
 
-/*void Segment::Print(IBML* bml) const
-{
-	std::stringstream ss;
-	if (segment != 0) {
-		ss << "#" << this->segment << ":";
-		bml->SendIngameMessage(ss.str().c_str()); ss.str("");
-	}
-	
-	ss << "Points: " << this->points;
-	bml->SendIngameMessage(ss.str().c_str()); ss.str("");
-	ss << "Time: " << this->srTime / 1000.0 << "s";
-	bml->SendIngameMessage(ss.str().c_str()); ss.str("");
-}*/
 void Segment::OnLoad() {
 	GetConfig()->SetCategoryComment("General", "General Settings");
 	_props[0] = GetConfig()->GetProperty("General", "Enabled?");
@@ -50,8 +37,8 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	_gui = new BGui::Gui;
 	_panel = _gui->AddPanel("M_Segment_Bg", VxColor(255, 168, 0, 200), TITLE_X_POS, PANEL_INIT_Y_POS, 0.35f, 0.03f);
 	_panel->SetZOrder(0);
-	//_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + 1.0 * PANEL_Y_SHIFT));
 	_panel->SetVisible(false);
+
 	_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
 	_title->SetZOrder(10);
 	_title->SetAlignment(ALIGN_LEFT);
@@ -77,22 +64,14 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	for (int i = 1; i <= 9; i++) {
 		//std::stringstream ss;
 		sprintf_s(buffer, "Sector_%02d", i);
-		//ss << "Sector_" << std::setfill('0') << std::setw(2) << i;
-		//auto group = m_bml->GetGroupByName(buffer);
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
 
 		_segmentCount = i;
 	}
 
-	//memset(_segmentTime, 0, sizeof(_segmentTime));
-
 	for (int i = 0; i < 9; i++)
 		_segmentTime[i] = 0.0f;
-	//sprintf_s(buffer, "Sector count: %d", _segmentCount);
-	//std::stringstream ss;
-	//ss << "Sector count: " << _segmentCount;
-	//m_bml->SendIngameMessage(buffer);
 
 	this->srTime = 0;
 }
@@ -102,11 +81,6 @@ void Segment::OnPreEndLevel()
 	_segmentTime[segment] = srTime;
 	segment++;
 	_panel->SetVisible(false);
-	//_energy->GetElementValue(0, 0, &(this->points));
-	//this->segment = 0;
-	//m_bml->SendIngameMessage("Finished!");
-	//Print(m_bml);
-	//m_bml->SendIngameMessage("----------");
 	this->counting = false;
 }
 
@@ -165,14 +139,6 @@ void Segment::OnProcess()
 
 void Segment::OnStartLevel()
 {
-	//this->_energy = m_bml->GetArrayByName("Energy");
-	//this->_currentLevel = m_bml->GetArrayByName("CurrentLevel");
-	//int currentLevel;
-	//this->_currentLevel->GetElementValue(0, 0, &currentLevel);
-	//m_bml->SendIngameMessage("----------");
-	//std::stringstream ss;
-	//ss << "Starting level " << currentLevel << "...";
-	//m_bml->SendIngameMessage(ss.str().c_str());
 	this->counting = false;
 	this->srTime = 0;
 	this->segment = 0;
@@ -186,19 +152,15 @@ void Segment::OnStartLevel()
 		_labels[i][2]->SetVisible(_enabled);
 	}
 	_labels[0][1]->SetText("00.000s");
-	//_energy->GetElementValue(0, 0, &(this->points));
-	//char buf[5];
-	//sprintf_s(buf, "%04d", points);
-	//_segments[0][2]->SetText(buf);
 }
 
 void Segment::OnPreCheckpointReached()
 {
-	//_energy->GetElementValue(0, 0, &(this->points));
 	if (_segmentTime[segment] == 0.0f || srTime < _segmentTime[segment])
 		_segmentTime[segment] = srTime;
+
 	this->segment++;
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + (float)segment * PANEL_Y_SHIFT));
-	//Print(m_bml);
+
 	srTime = 0;
 }
