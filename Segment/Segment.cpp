@@ -16,6 +16,7 @@ void Segment::OnLoad() {
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
+	_enabled = _props[0]->GetBoolean();
 	if (prop == _props[0] && m_bml->IsIngame()) {
 		_title->SetVisible(_enabled);
 		_panel->SetVisible(_enabled);
