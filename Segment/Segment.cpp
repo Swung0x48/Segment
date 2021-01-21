@@ -19,6 +19,12 @@ IMod* BMLEntry(IBML* bml) {
 	ss << "Time: " << this->srTime / 1000.0 << "s";
 	bml->SendIngameMessage(ss.str().c_str()); ss.str("");
 }*/
+void Segment::OnLoad() {
+	GetConfig()->SetCategoryComment("General", "General Settings");
+	_props[0] = GetConfig()->GetProperty("General", "Enabled?");
+	_props[0]->SetComment("Enable Segment");
+	_props[0]->SetDefaultBoolean(true);
+}
 
 void Segment::OnPreStartMenu() {
 	_panel->SetVisible(false);
@@ -157,13 +163,13 @@ void Segment::OnStartLevel()
 	this->srTime = 0;
 	this->segment = 0;
 
-	_title->SetVisible(true);
-	_panel->SetVisible(true);
+	_title->SetVisible(_props[0]->GetBoolean());
+	_panel->SetVisible(_props[0]->GetBoolean());
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + (float)segment * PANEL_Y_SHIFT));
 	for (int i = 0; i < _segmentCount; i++) {
-		_labels[i][0]->SetVisible(true);
-		_labels[i][1]->SetVisible(true);
-		_labels[i][2]->SetVisible(true);
+		_labels[i][0]->SetVisible(_props[0]->GetBoolean());
+		_labels[i][1]->SetVisible(_props[0]->GetBoolean());
+		_labels[i][2]->SetVisible(_props[0]->GetBoolean());
 	}
 	_labels[0][1]->SetText("00.000s");
 	//_energy->GetElementValue(0, 0, &(this->points));

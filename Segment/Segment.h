@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 2;
+constexpr int SEG_PATCH_VER = 5;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -34,7 +34,8 @@ private:
 	int _segmentCount = 0;
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
-	void Print(IBML* bml) const;
+	IProperty* _props[1];
+	//void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}
 	virtual CKSTRING GetID() override { return "Segment"; }
@@ -44,6 +45,7 @@ public:
 	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance splitted into each segment."; }
 	DECLARE_BML_VERSION;
 
+	virtual void OnLoad() override;
 	virtual void OnPreStartMenu() override;
 	virtual void OnPreEndLevel() override;
 	virtual void OnCounterActive() override;
