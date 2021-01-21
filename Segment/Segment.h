@@ -17,19 +17,20 @@ private:
 
 	const float TITLE_Y_SHIFT = 0.01f; // Between title & first row
 	const float ITEM_Y_SHIFT = 0.03f; // Between rows
-	const float TITLE_X_SHIFT = 0.03f; // Between heading (#n) & first col
-	const float ITEM_X_SHIFT = 0.10f; // Between cols
+	const float TITLE_X_SHIFT = 0.02f; // Between heading (#n) & first col
+	const float ITEM_X_SHIFT = 0.14f; // Between cols
 
 	double srTime = 0;
 	int points;
 	int segment = 0;
 	bool counting;
-	CKDataArray* _energy;
+	//CKDataArray* _energy;
 	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
 	BGui::Label* _title = nullptr;
 	int _segmentCount = 0;
-	BGui::Label* _segments[9][3];
+	BGui::Label* _labels[9][3];
+	float _segmentTime[9];
 	void Print(IBML* bml) const;
 public:
 	Segment(IBML* bml): IMod(bml) {}
