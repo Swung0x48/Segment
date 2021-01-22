@@ -1,5 +1,4 @@
 #include "Segment.h"
-#include <cmath>
 
 IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
@@ -116,12 +115,8 @@ void Segment::OnUnpauseLevel()
 
 void Segment::OnProcess()
 {
-	processLoopCount++;
+	loopCount++;
 
-	double lastDeltaTime = static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
-	//if (lastDeltaTime > 18.0)
-	//GetLogger()->Warn("%lf", lastDeltaTime);
-	
 	if (this->counting)
 		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
 	
@@ -129,15 +124,15 @@ void Segment::OnProcess()
 	if (_enabled) {
 		if (m_bml->IsIngame()) {
 			//assert(segment <= _segmentCount);
-			if (processLoopCount % TAKE == TAKE / 5 * 0) {
-				if (fabs(srTime / 1000.0) <= 9999.999)
+			if (loopCount % TAKE == TAKE / 5 * 0) {
+				if (srTime / 1000.0 <= 9999.999)
 					sprintf(timeString, "%.3fs", srTime / 1000.0);
 				else
 					strcpy(timeString, "9999.999s");
 			}
-			else if (processLoopCount % TAKE == TAKE / 5 * 1)
+			else if (loopCount % TAKE == TAKE / 5 * 1)
 				_labels[segment][1]->SetText(timeString);
-			else if (processLoopCount % TAKE == TAKE / 5 * 2) {
+			else if (loopCount % TAKE == TAKE / 5 * 2) {
 				double currentTime = _segmentTime[segment];
 				_delta = srTime - currentTime;
 				if (currentTime < 0.0)
@@ -151,7 +146,7 @@ void Segment::OnProcess()
 						_panel->SetColor(VxColor(220, 20, 60, 200));
 				}
 			}
-			else if (processLoopCount % TAKE == TAKE / 5 * 3) {
+			else if (loopCount % TAKE == TAKE / 5 * 3) {
 				if (_delta / 1000.0 <= 9999.999 && _delta / 1000.0 >= -9999.999)
 					sprintf(deltaString, "%+.3fs", _delta / 1000.0f);
 				else if (_delta / 1000.0 > 9999.999)
@@ -175,15 +170,6 @@ void Segment::OnStartLevel()
 	this->srTime = 0;
 	this->segment = 0;
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
-
-	/*_title->SetVisible(_enabled);
-	_panel->SetVisible(_enabled);
-	for (int i = 0; i < _segmentCount; i++) {
-		_labels[i][0]->SetVisible(_enabled);
-		_labels[i][1]->SetVisible(_enabled);
-		_labels[i][2]->SetVisible(_enabled);
-	}*/
-	//_labels[0][1]->SetText("00.000s");
 }
 
 void Segment::OnPreCheckpointReached()

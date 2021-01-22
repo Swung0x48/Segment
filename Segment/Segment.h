@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 12;
+constexpr int SEG_PATCH_VER = 13;
 constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
 
 extern "C" {
@@ -39,7 +39,7 @@ private:
 	double _delta;
 	char timeString[BUF_SIZE];
 	char deltaString[BUF_SIZE];
-	long long processLoopCount = 0;
+	long long loopCount = 0;
 	const int TAKE = 5;
 	bool _enabled = true;
 public:
