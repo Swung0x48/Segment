@@ -35,7 +35,8 @@ void Segment::OnPreStartMenu() {
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
 	BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 	XObjectArray* objArray, CKObject* masterObj) {
-	if (!(strlen(filename) == 30 && filename[18] == 'L' && filename[19] == 'e' && filename[23] == '_'))
+	if (!(strlen(filename) == 30 && filename[18] == 'L' && filename[19] == 'e' && filename[23] == '_')
+		&& !(filename[13] == 'M' && filename[14] == 'a' && filename[15] == 'p' && filename[16] == 's'))
 		return;
 
 	_gui = new BGui::Gui;
