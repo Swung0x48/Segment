@@ -28,7 +28,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 }
 
 void Segment::OnPreStartMenu() {
-	_panel->SetVisible(false);
+//	_panel->SetVisible(false);
 }
 
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
@@ -62,7 +62,6 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		return;
 	char buffer[20];
 	for (int i = 1; i <= 9; i++) {
-		//std::stringstream ss;
 		sprintf_s(buffer, "Sector_%02d", i);
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
@@ -71,7 +70,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	}
 
 	for (double& i : _segmentTime)
-		i = 0.0;
+		i = -1.0;
 
 	this->srTime = 0;
 }
@@ -106,42 +105,54 @@ void Segment::OnUnpauseLevel()
 
 void Segment::OnProcess()
 {
+	turn++;
+
+	double lastDeltaTime = static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
+	GetLogger()->Info("%lf", lastDeltaTime);
+	
 	if (this->counting)
 		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
+	
 
 	if (_enabled) {
 		if (m_bml->IsIngame()) {
-			assert(segment <= _segmentCount);
-
-			char timeString[BUF_SIZE];
-			if (fabs(srTime / 1000.0) <= 9999.999)
-				sprintf_s(timeString, "%.3fs", srTime / 1000.0);
-			else
-				strcpy_s(timeString, "9999.999s");
-			_labels[segment][1]->SetText(timeString);
-
-			char deltaString[BUF_SIZE];
-			double currentTime = _segmentTime[segment];
-			if (currentTime == 0.0)
-				_panel->SetColor(VxColor(255, 168, 0, 200));
-			else {
-				double delta = srTime - currentTime;
-				if (fabs(delta / 1000.0) <= 9999.999)
-					sprintf_s(deltaString, "%+.3fs", delta / 1000.0f);
-				else if (delta / 1000.0 > 9999.999)
+			//assert(segment <= _segmentCount);
+			if (turn % TAKE == TAKE / 5 * 0) {
+				if (fabs(srTime / 1000.0) <= 9999.999)
+					sprintf_s(timeString, "%.3fs", srTime / 1000.0);
+				else
+					strcpy_s(timeString, "9999.999s");
+			}
+			else if (turn % TAKE == TAKE / 5 * 1)
+				_labels[segment][1]->SetText(timeString);
+			else if (turn % TAKE == TAKE / 5 * 2) {
+				double currentTime = _segmentTime[segment];
+				_delta = srTime - currentTime;
+				if (currentTime < 0.0)
+					_panel->SetColor(VxColor(255, 168, 0, 200));
+				else {
+					if (_delta < 0.0)
+						_panel->SetColor(VxColor(50, 205, 50, 200));
+					else if (_delta == 0.0)
+						_panel->SetColor(VxColor(255, 168, 0, 200));
+					else
+						_panel->SetColor(VxColor(220, 20, 60, 200));
+				}
+			}
+			else if (turn % TAKE == TAKE / 5 * 3) {
+				
+				if (_delta / 1000.0 <= 9999.999 && _delta / 1000.0 >= -9999.999)
+					sprintf_s(deltaString, "%+.3fs", _delta / 1000.0f);
+				else if (_delta / 1000.0 > 9999.999)
 					strcpy_s(deltaString, "+9999.999s");
 				else
 					strcpy_s(deltaString, "-9999.999s");
-				_labels[segment][2]->SetText(deltaString);
-
-				if (delta < 0.0)
-					_panel->SetColor(VxColor(50, 205, 50, 200));
-				else if (delta == 0.0)
-					_panel->SetColor(VxColor(255, 168, 0, 200));
-				else
-					_panel->SetColor(VxColor(220, 20, 60, 200));
 			}
+			else
+				if (_segmentTime[segment] > 0.0)
+					_labels[segment][2]->SetText(deltaString);
 
+			//if (turn % TAKE == TAKE / 3 * 2)
 			_gui->Process();
 		}
 	}
@@ -166,7 +177,7 @@ void Segment::OnStartLevel()
 
 void Segment::OnPreCheckpointReached()
 {
-	if (_segmentTime[segment] == 0.0 || srTime < _segmentTime[segment])
+	if (_segmentTime[segment] < 0.0 || srTime < _segmentTime[segment])
 		_segmentTime[segment] = srTime;
 
 	this->segment++;
