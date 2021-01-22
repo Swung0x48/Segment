@@ -39,7 +39,7 @@ private:
 	double _delta;
 	char timeString[BUF_SIZE];
 	char deltaString[BUF_SIZE];
-	long long turn = 0;
+	long long processLoopCount = 0;
 	const int TAKE = 5;
 	bool _enabled = true;
 public:
