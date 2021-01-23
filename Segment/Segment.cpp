@@ -10,11 +10,24 @@ void Segment::OnLoad() {
 	_props[0]->SetComment("Enable Segment");
 	_props[0]->SetDefaultBoolean(true);
 
+	GetConfig()->SetCategoryComment("Tweaking", "Performance Tweaking");
+	_props[1] = GetConfig()->GetProperty("Tweaking", "SkipFrames?");
+	_props[1]->SetComment("Enable frame skipping feature to optimize performance");
+	_props[1]->SetDefaultBoolean(false);
+	_props[2] = GetConfig()->GetProperty("Tweaking", "Skip_Step");
+	_props[2]->SetComment("Skip GUI process every (Skip_Step):1 frame");
+	_props[2]->SetDefaultInteger(240);
+
 	_enabled = _props[0]->GetBoolean();
+	_skipEnabled = _props[1]->GetBoolean();
+	_skipStep = _props[2]->GetInteger();
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	_enabled = _props[0]->GetBoolean();
+	_skipEnabled = _props[1]->GetBoolean();
+	_skipStep = _props[2]->GetInteger();
+
 	if (prop == _props[0] && m_bml->IsIngame()) {
 		_title->SetVisible(_enabled);
 		_panel->SetVisible(_enabled);
@@ -91,6 +104,7 @@ void Segment::OnPreEndLevel()
 	segment++;
 	_panel->SetVisible(false);
 	this->counting = false;
+	_gui->Process();
 }
 
 void Segment::OnCounterActive()
@@ -124,15 +138,17 @@ void Segment::OnProcess()
 	if (_enabled) {
 		if (m_bml->IsIngame()) {
 			//assert(segment <= _segmentCount);
-			if (loopCount % TAKE == TAKE / 5 * 0) {
+			if (loopCount % cycle == cycle / 5 * 0) {
 				if (srTime / 1000.0 <= 9999.999)
 					sprintf(timeString, "%.3fs", srTime / 1000.0);
 				else
 					strcpy(timeString, "9999.999s");
 			}
-			else if (loopCount % TAKE == TAKE / 5 * 1)
+			else if (loopCount % cycle == cycle / 5 * 1) {
 				_labels[segment][1]->SetText(timeString);
-			else if (loopCount % TAKE == TAKE / 5 * 2) {
+				//_labels[segment][1]->Process();
+			}
+			else if (loopCount % cycle == cycle / 5 * 2) {
 				double currentTime = _segmentTime[segment];
 				_delta = srTime - currentTime;
 				if (currentTime < 0.0)
@@ -146,7 +162,7 @@ void Segment::OnProcess()
 						_panel->SetColor(VxColor(220, 20, 60, 200));
 				}
 			}
-			else if (loopCount % TAKE == TAKE / 5 * 3) {
+			else if (loopCount % cycle == cycle / 5 * 3) {
 				if (_delta / 1000.0 <= 9999.999 && _delta / 1000.0 >= -9999.999)
 					sprintf(deltaString, "%+.3fs", _delta / 1000.0f);
 				else if (_delta / 1000.0 > 9999.999)
@@ -154,12 +170,22 @@ void Segment::OnProcess()
 				else
 					strcpy(deltaString, "-9999.999s");
 			}
-			else
-				if (_segmentTime[segment] > 0.0)
+			else {
+				if (_segmentTime[segment] > 0.0) 
 					_labels[segment][2]->SetText(deltaString);
+				
+				//_labels[segment][2]->Process();
+			}
 
-			//if (turn % TAKE == TAKE / 3 * 2)
-			_gui->Process();
+			//_gui->Process();
+			if (loopCount % _skipStep != 0 || !_skipEnabled) {
+				_title->Process();
+				for (int i = 0; i < _segmentCount; i++) {
+					_labels[i][0]->Process();
+					_labels[i][1]->Process();
+					_labels[i][2]->Process();
+				}
+			}
 		}
 	}
 }

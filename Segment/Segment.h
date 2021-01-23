@@ -2,8 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 13;
-constexpr char SEG_VERSION[] = { SEG_MAJOR_VER + '0', '.', SEG_MINOR_VER + '0', '.', SEG_PATCH_VER + '0' };
+constexpr int SEG_PATCH_VER = 15;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -24,6 +23,8 @@ private:
 
 	static constexpr int BUF_SIZE = 50;
 
+	char SEG_VERSION[20];
+
 	double srTime = 0;
 	int points;
 	int segment = 0;
@@ -35,17 +36,22 @@ private:
 	int _segmentCount = 0;
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
-	IProperty* _props[1];
+	IProperty* _props[3];
 	double _delta;
 	char timeString[BUF_SIZE];
 	char deltaString[BUF_SIZE];
 	long long loopCount = 0;
-	const int TAKE = 5;
+	const int cycle = 5;
+	bool _skipEnabled = false;
+	int _skipStep = 60;
 	bool _enabled = true;
 public:
 	Segment(IBML* bml): IMod(bml) {}
 	virtual CKSTRING GetID() override { return "Segment"; }
-	virtual CKSTRING GetVersion() override { return SEG_VERSION; }
+	virtual CKSTRING GetVersion() override { 
+		sprintf(SEG_VERSION, "%d.%d.%d", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
+		return SEG_VERSION; 
+	}
 	virtual CKSTRING GetName() override { return "Segment"; }
 	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
 	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance splitted into each segment."; }
