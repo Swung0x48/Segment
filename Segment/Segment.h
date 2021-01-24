@@ -38,15 +38,15 @@ private:
 	double _segmentTime[9];
 	IProperty* _props[3];
 	double _delta;
-	char timeString[BUF_SIZE];
-	char deltaString[BUF_SIZE];
-	long long loopCount = 0;
-	const int cycle = 5;
+	char _timeString[BUF_SIZE];
+	char _deltaString[BUF_SIZE];
+	long long _loopCount = 0;
+	std::vector<std::function<void()>> _dutySlices;
 	bool _skipEnabled = false;
 	int _skipStep = 60;
 	bool _enabled = true;
 public:
-	Segment(IBML* bml): IMod(bml) {}
+	Segment(IBML* bml);
 	virtual CKSTRING GetID() override { return "Segment"; }
 	virtual CKSTRING GetVersion() override { 
 		sprintf(SEG_VERSION, "%d.%d.%d", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
