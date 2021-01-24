@@ -37,6 +37,17 @@ private:
 	int LAG_G = 20;
 	int LAG_B = 60;
 	int LAG_A = 200;
+	bool _useNativeFontRendering = true;
+	char TITLE_FONT[BUF_SIZE] = "Bank Gothic";
+	int TITLE_FONT_SIZE = 20;
+	int TITLE_FONT_WEIGHT = 500;
+	bool TITLE_ITALIC = false;
+	bool TITLE_UNDERLINE = false;
+	char ITEM_FONT[BUF_SIZE] = "Bank Gothic";
+	int TITLE_FONT_SIZE = 15;
+	int TITLE_FONT_WEIGHT = 500;
+	bool TITLE_ITALIC = false;
+	bool TITLE_UNDERLINE = false;
 
 	double srTime = 0;
 	int points;
@@ -44,10 +55,11 @@ private:
 	bool counting;
 	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
-	BGui::Label* _title = nullptr;
+	BGui::Text* _title = nullptr;
 	BGui::Panel* _panel = nullptr;
+	BGui::Panel* _background = nullptr;
 	int _segmentCount = 0;
-	BGui::Label* _labels[9][3];
+	BGui::Text* _labels[9][3];
 	double _segmentTime[9];
 	IProperty* _props[6];
 	double _delta;
