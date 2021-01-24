@@ -1,7 +1,7 @@
 # Segment
 
 ## What is this?
-A Ballance mod to display your gameplay performance splitted into each segment.
+A Ballance mod to display your gameplay performance split into each segment.
 
 This is a mod of [BallanceModLoader](https://github.com/Gamepiaynmo/BallanceModLoader).
 
