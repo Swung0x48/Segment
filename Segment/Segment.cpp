@@ -10,10 +10,10 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			sprintf(_timeString, "%.3fs", srTime / 1000.0);
 		else
 			strcpy(_timeString, "9999.999s");
-		});
+	});
 	_dutySlices.push_back([&]() {
 		_labels[segment][1]->SetText(_timeString);
-		});
+	});
 	_dutySlices.push_back([&]() {
 		double currentTime = _segmentTime[segment];
 		_delta = srTime - currentTime;
@@ -27,7 +27,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			else
 				_panel->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
 		}
-		});
+	});
 	_dutySlices.push_back([&]() {
 		if (_delta / 1000.0 <= 9999.999 && _delta / 1000.0 >= -9999.999)
 			sprintf(_deltaString, "%+.3fs", _delta / 1000.0f);
@@ -35,11 +35,11 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			strcpy(_deltaString, "+9999.999s");
 		else
 			strcpy(_deltaString, "-9999.999s");
-		});
+	});
 	_dutySlices.push_back([&]() {
 		if (_segmentTime[segment] > 0.0)
 			_labels[segment][2]->SetText(_deltaString);
-		});
+	});
 }
 
 void Segment::OnLoad() {
@@ -73,6 +73,30 @@ void Segment::OnLoad() {
 	sscanf(_props[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
 	sscanf(_props[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
 	sscanf(_props[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
+
+	_gui = new BGui::Gui;
+	_panel = _gui->AddPanel("M_Segment_Bg", VxColor(255, 168, 0, 200), TITLE_X_POS, PANEL_INIT_Y_POS, 0.35f, 0.03f);
+	_panel->SetZOrder(0);
+	_panel->SetVisible(false);
+
+	_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+	_title->SetZOrder(10);
+	_title->SetAlignment(ALIGN_LEFT);
+	_title->SetVisible(false);
+
+	char labelText[5] = "#1: ";
+	for (int i = 1; i <= 9; i++) {
+		labelText[1] = i + '0';
+		_labels[i - 1][0] = _gui->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_labels[i - 1][0]->SetAlignment(ALIGN_LEFT);
+		_labels[i - 1][0]->SetVisible(false);
+		_labels[i - 1][1] = _gui->AddTextLabel("M_Segment_Time", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_labels[i - 1][1]->SetAlignment(ALIGN_CENTER);
+		_labels[i - 1][1]->SetVisible(false);
+		_labels[i - 1][2] = _gui->AddTextLabel("M_Segment_Score", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		_labels[i - 1][2]->SetAlignment(ALIGN_CENTER);
+		_labels[i - 1][2]->SetVisible(false);
+	}
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
@@ -102,33 +126,8 @@ void Segment::OnPreStartMenu() {
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
 	BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 	XObjectArray* objArray, CKObject* masterObj) {
-	if (!(strlen(filename) == 30 && filename[18] == 'L' && filename[19] == 'e' && filename[23] == '_')
-		&& !(filename[13] == 'M' && filename[14] == 'a' && filename[15] == 'p' && filename[16] == 's'))
+	if (!isMap)
 		return;
-
-	_gui = new BGui::Gui;
-	_panel = _gui->AddPanel("M_Segment_Bg", VxColor(255, 168, 0, 200), TITLE_X_POS, PANEL_INIT_Y_POS, 0.35f, 0.03f);
-	_panel->SetZOrder(0);
-	_panel->SetVisible(false);
-
-	_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
-	_title->SetZOrder(10);
-	_title->SetAlignment(ALIGN_LEFT);
-	_title->SetVisible(false);
-
-	char labelText[5] = "#1: ";
-	for (int i = 1; i <= 9; i++) {
-		labelText[1] = i + '0';
-		_labels[i-1][0] = _gui->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float) i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i-1][0]->SetAlignment(ALIGN_LEFT);
-		_labels[i-1][0]->SetVisible(false);
-		_labels[i-1][1] = _gui->AddTextLabel("M_Segment_Time", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i-1][1]->SetAlignment(ALIGN_CENTER);
-		_labels[i-1][1]->SetVisible(false);
-		_labels[i-1][2] = _gui->AddTextLabel("M_Segment_Score", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i-1][2]->SetAlignment(ALIGN_CENTER);
-		_labels[i-1][2]->SetVisible(false);
-	}
 
 	char buffer[20];
 	for (int i = 1; i <= 9; i++) {
