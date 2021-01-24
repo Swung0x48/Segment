@@ -18,14 +18,14 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 		double currentTime = _segmentTime[segment];
 		_delta = srTime - currentTime;
 		if (currentTime < 0.0)
-			_panel->SetColor(VxColor(255, 168, 0, 200));
+			_panel->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 		else {
 			if (_delta < 0.0)
-				_panel->SetColor(VxColor(50, 205, 50, 200));
+				_panel->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
 			else if (_delta == 0.0)
-				_panel->SetColor(VxColor(255, 168, 0, 200));
+				_panel->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 			else
-				_panel->SetColor(VxColor(220, 20, 60, 200));
+				_panel->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
 		}
 		});
 	_dutySlices.push_back([&]() {
@@ -56,15 +56,32 @@ void Segment::OnLoad() {
 	_props[2]->SetComment("Skip GUI process every (Skip_Step):1 frame");
 	_props[2]->SetDefaultInteger(240);
 
+	GetConfig()->SetCategoryComment("Customize", "Appearance Customize");
+	_props[3] = GetConfig()->GetProperty("Customize", "Lead_Color");
+	_props[3]->SetComment("Leading highlight color, in r,g,b,a format. Default: 50,205,50,200");
+	_props[3]->SetDefaultString("50,205,50,200");
+	_props[4] = GetConfig()->GetProperty("Customize", "Even_Color");
+	_props[4]->SetComment("Leading or default highlight color, in r,g,b,a format. Default: 255,168,0,200");
+	_props[4]->SetDefaultString("255,168,0,200");
+	_props[5] = GetConfig()->GetProperty("Customize", "Lag_Color");
+	_props[5]->SetComment("Lagging highlight color, in r,g,b,a format. Default: 220,20,60,200");
+	_props[5]->SetDefaultString("220,20,60,200");
+
 	_enabled = _props[0]->GetBoolean();
 	_skipEnabled = _props[1]->GetBoolean();
 	_skipStep = _props[2]->GetInteger();
+	sscanf(_props[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
+	sscanf(_props[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
+	sscanf(_props[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	_enabled = _props[0]->GetBoolean();
 	_skipEnabled = _props[1]->GetBoolean();
 	_skipStep = _props[2]->GetInteger();
+	sscanf(_props[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
+	sscanf(_props[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
+	sscanf(_props[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
 
 	if (prop == _props[0] && m_bml->IsIngame()) {
 		_title->SetVisible(_enabled);

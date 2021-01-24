@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 16;
+constexpr int SEG_PATCH_VER = 17;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -25,6 +25,19 @@ private:
 
 	char SEG_VERSION[20];
 
+	int LEAD_R = 50;
+	int LEAD_G = 205;
+	int LEAD_B = 50;
+	int LEAD_A = 200;
+	int EVEN_R = 255;
+	int EVEN_G = 168;
+	int EVEN_B = 0;
+	int EVEN_A = 200;
+	int LAG_R = 220;
+	int LAG_G = 20;
+	int LAG_B = 60;
+	int LAG_A = 200;
+
 	double srTime = 0;
 	int points;
 	int segment = 0;
@@ -36,7 +49,7 @@ private:
 	int _segmentCount = 0;
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
-	IProperty* _props[3];
+	IProperty* _props[6];
 	double _delta;
 	char _timeString[BUF_SIZE];
 	char _deltaString[BUF_SIZE];
