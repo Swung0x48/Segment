@@ -20,6 +20,10 @@ private:
 	static constexpr float TITLE_X_SHIFT = 0.02f; // Between heading (#n) & first col
 	static constexpr float ITEM_X_SHIFT = 0.14f; // Between cols
 	static constexpr float PANEL_Y_SHIFT = 0.03f; // Panel movement
+	static constexpr float PANEL_WIDTH = 0.35f;
+	static constexpr float PANEL_HEIGHT = 0.03f;
+
+	float PANEL_INIT_HEIGHT = _useNativeFontRendering ? 0.03f : 0.0353f;
 
 	static constexpr int BUF_SIZE = 50;
 
@@ -44,10 +48,10 @@ private:
 	bool TITLE_ITALIC = false;
 	bool TITLE_UNDERLINE = false;
 	char ITEM_FONT[BUF_SIZE] = "Bank Gothic";
-	int TITLE_FONT_SIZE = 15;
-	int TITLE_FONT_WEIGHT = 500;
-	bool TITLE_ITALIC = false;
-	bool TITLE_UNDERLINE = false;
+	int ITEM_FONT_SIZE = 15;
+	int ITEM_FONT_WEIGHT = 500;
+	bool ITEM_ITALIC = false;
+	bool ITEM_UNDERLINE = false;
 
 	double srTime = 0;
 	int points;
@@ -61,7 +65,7 @@ private:
 	int _segmentCount = 0;
 	BGui::Text* _labels[9][3];
 	double _segmentTime[9];
-	IProperty* _props[6];
+	IProperty* _props[17];
 	double _delta;
 	char _timeString[BUF_SIZE];
 	char _deltaString[BUF_SIZE];
@@ -81,6 +85,8 @@ public:
 	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
 	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance splitted into each segment."; }
 	DECLARE_BML_VERSION;
+
+	void RefreshConfig();
 
 	virtual void OnLoad() override;
 	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
