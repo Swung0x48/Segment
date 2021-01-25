@@ -12,7 +12,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			strcpy(_timeString, "9999.999s");
 	});
 	_dutySlices.push_back([&]() {
-		_labels[segment][1]->SetText(_timeString);
+		T_labels[segment][1]->SetText(_timeString);
 	});
 	_dutySlices.push_back([&]() {
 		double currentTime = _segmentTime[segment];
@@ -38,7 +38,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 	});
 	_dutySlices.push_back([&]() {
 		if (_segmentTime[segment] > 0.0)
-			_labels[segment][2]->SetText(_deltaString);
+			T_labels[segment][2]->SetText(_deltaString);
 	});
 }
 
@@ -130,27 +130,27 @@ void Segment::OnLoad() {
 	_background->SetZOrder(-1);
 	_background->SetVisible(false);
 
-	_title = _gui->AddText("M_Segment_Title", "Segments:", TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
-	_title->SetZOrder(10);
-	_title->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
-	_title->SetAlignment(CKSPRITETEXT_LEFT);
-	_title->SetVisible(false);
+	T_title = _gui->AddText("M_Segment_Title", "Segments:", TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+	T_title->SetZOrder(10);
+	T_title->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
+	T_title->SetAlignment(CKSPRITETEXT_LEFT);
+	T_title->SetVisible(false);
 
 	char labelText[5] = "#1: ";
 	for (int i = 1; i <= 9; i++) {
 		labelText[1] = i + '0';
-		_labels[i - 1][0] = _gui->AddText("M_Segment_Seg", labelText, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i - 1][0]->SetAlignment(CKSPRITETEXT_LEFT);
-		_labels[i - 1][0]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-		_labels[i - 1][0]->SetVisible(false);
-		_labels[i - 1][1] = _gui->AddText("M_Segment_Time", "----", TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i - 1][1]->SetAlignment(CKSPRITETEXT_CENTER);
-		_labels[i - 1][1]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-		_labels[i - 1][1]->SetVisible(false);
-		_labels[i - 1][2] = _gui->AddText("M_Segment_Score", "----", TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-		_labels[i - 1][2]->SetAlignment(CKSPRITETEXT_CENTER);
-		_labels[i - 1][2]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-		_labels[i - 1][2]->SetVisible(false);
+		T_labels[i - 1][0] = _gui->AddText("M_Segment_Seg", labelText, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		T_labels[i - 1][0]->SetAlignment(CKSPRITETEXT_LEFT);
+		T_labels[i - 1][0]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+		T_labels[i - 1][0]->SetVisible(false);
+		T_labels[i - 1][1] = _gui->AddText("M_Segment_Time", "----", TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		T_labels[i - 1][1]->SetAlignment(CKSPRITETEXT_CENTER);
+		T_labels[i - 1][1]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+		T_labels[i - 1][1]->SetVisible(false);
+		T_labels[i - 1][2] = _gui->AddText("M_Segment_Score", "----", TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+		T_labels[i - 1][2]->SetAlignment(CKSPRITETEXT_CENTER);
+		T_labels[i - 1][2]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+		T_labels[i - 1][2]->SetVisible(false);
 	}
 }
 
@@ -158,30 +158,51 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	RefreshConfig();
 
 	if (prop == _props[0] && m_bml->IsIngame()) {
-		_title->SetVisible(_enabled);
+		T_title->SetVisible(_enabled);
 		_panel->SetVisible(_enabled);
 		_background->SetVisible(_enabled);
 		for (int i = 0; i < _segmentCount; i++) {
-			_labels[i][0]->SetVisible(_enabled);
-			_labels[i][1]->SetVisible(_enabled);
-			_labels[i][2]->SetVisible(_enabled);
+			T_labels[i][0]->SetVisible(_enabled);
+			T_labels[i][1]->SetVisible(_enabled);
+			T_labels[i][2]->SetVisible(_enabled);
 		}
 	} 
 	
 	if (prop == _props[6]) {
 		delete _gui;
 	}
+
+	for (int i = 7; i <= 11; i++) {
+		if (_useNativeFontRendering)
+			break;
+		if (prop == _props[i]) {
+			T_title->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
+			break;
+		}
+	}
+
+	for (int i = 12; i <= 16; i++) {
+		if (_useNativeFontRendering)
+			break;
+		if (prop == _props[i]) {
+			for (auto& j: T_labels) {
+				for (auto& k : j)
+					k->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+			}
+			break;
+		}
+	}
 }
 
 void Segment::OnPreStartMenu() {
 	if (_panel != nullptr)
 		_panel->SetVisible(false);
-	_title->SetVisible(false);
+	T_title->SetVisible(false);
 	_background->SetVisible(false);
 	for (int i = 1; i <= 9; i++) {
-		_labels[i - 1][0]->SetVisible(false);
-		_labels[i - 1][1]->SetVisible(false);
-		_labels[i - 1][2]->SetVisible(false);
+		T_labels[i - 1][0]->SetVisible(false);
+		T_labels[i - 1][1]->SetVisible(false);
+		T_labels[i - 1][2]->SetVisible(false);
 	}
 }
 
@@ -204,23 +225,25 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		i = -1.0;
 
 	this->srTime = 0;
-	_title->SetVisible(_enabled);
+	if (_useNativeFontRendering)
+		_title->SetVisible(_enabled);
+	else
+		T_title->SetVisible(_enabled);
 	_panel->SetVisible(_enabled);
 	_background->SetVisible(_enabled);
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
-	int i;
-	for (i = 0; i < _segmentCount; i++) {
-		_labels[i][0]->SetVisible(_enabled);
-		_labels[i][1]->SetVisible(_enabled);
-		_labels[i][2]->SetVisible(_enabled);
+	for (int i = 0; i < _segmentCount; i++) {
+		T_labels[i][0]->SetVisible(_enabled);
+		T_labels[i][1]->SetVisible(_enabled);
+		T_labels[i][2]->SetVisible(_enabled);
 	}
 	for (int i = 0; i < _segmentCount; i++)
 		_segmentTime[i] = -1.0;
 	for (int i = 1; i <= 9; i++) {
-		_labels[i - 1][1]->SetText("----");
-		_labels[i - 1][2]->SetText("----");
+		T_labels[i - 1][1]->SetText("----");
+		T_labels[i - 1][2]->SetText("----");
 	}
-	_background->SetSize(Vx2DVector(PANEL_WIDTH, (float) i * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+	_background->SetSize(Vx2DVector(PANEL_WIDTH, (float) _segmentCount * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 }
 
 void Segment::OnPreEndLevel()
@@ -229,7 +252,8 @@ void Segment::OnPreEndLevel()
 	segment++;
 	_panel->SetVisible(false);
 	this->counting = false;
-	//_gui->Process();
+	if (_useNativeFontRendering)
+		_gui->Process();
 }
 
 void Segment::OnCounterActive()
@@ -263,16 +287,17 @@ void Segment::OnProcess()
 	if (_enabled) {
 		if (m_bml->IsIngame()) {
 			_dutySlices[_loopCount % _dutySlices.size()]();
-			
-			//_gui->Process();
-			/*if (_loopCount % _skipStep != 0 || !_skipEnabled) {
-				_title->Process();
-				for (int i = 0; i < _segmentCount; i++) {
-					_labels[i][0]->Process();
-					_labels[i][1]->Process();
-					_labels[i][2]->Process();
+
+			if (_useNativeFontRendering) {
+				if (_loopCount % _skipStep != 0 || !_skipEnabled) {
+					_title->Process();
+					for (int i = 0; i < _segmentCount; i++) {
+						_labels[i][0]->Process();
+						_labels[i][1]->Process();
+						_labels[i][2]->Process();
+					}
 				}
-			}*/
+			}
 		}
 	}
 }

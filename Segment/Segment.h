@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 18;
+constexpr int SEG_PATCH_VER = 19;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -59,11 +59,13 @@ private:
 	bool counting;
 	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
-	BGui::Text* _title = nullptr;
+	BGui::Text* T_title = nullptr;
+	BGui::Label* _title = nullptr;
 	BGui::Panel* _panel = nullptr;
 	BGui::Panel* _background = nullptr;
 	int _segmentCount = 0;
-	BGui::Text* _labels[9][3];
+	BGui::Text* T_labels[9][3];
+	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
 	IProperty* _props[17];
 	double _delta;
