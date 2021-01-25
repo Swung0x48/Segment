@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 20;
+constexpr int SEG_PATCH_VER = 21;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -22,8 +22,7 @@ private:
 	static constexpr float PANEL_Y_SHIFT = 0.03f; // Panel movement
 	static constexpr float PANEL_WIDTH = 0.35f;
 	static constexpr float PANEL_HEIGHT = 0.03f;
-
-	float PANEL_INIT_HEIGHT = _useNativeFontRendering ? 0.03f : 0.0353f;
+	float PANEL_INIT_HEIGHT = 0.0353f;
 
 	static constexpr int BUF_SIZE = 50;
 
@@ -64,6 +63,7 @@ private:
 	BGui::Panel* _panel = nullptr;
 	BGui::Panel* _background = nullptr;
 	int _segmentCount = 0;
+	char text[9][2][BUF_SIZE];
 	BGui::Text* T_labels[9][3];
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
