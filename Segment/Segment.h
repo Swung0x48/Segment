@@ -2,7 +2,7 @@
 #include <BML/BMLAll.h>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 19;
+constexpr int SEG_PATCH_VER = 20;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -85,10 +85,11 @@ public:
 	}
 	virtual CKSTRING GetName() override { return "Segment"; }
 	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
-	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance splitted into each segment."; }
+	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance split into each segment."; }
 	DECLARE_BML_VERSION;
 
 	void RefreshConfig();
+	void InitGui();
 
 	virtual void OnLoad() override;
 	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
