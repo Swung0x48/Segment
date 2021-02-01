@@ -181,6 +181,16 @@ void Segment::OnLoad() {
 	_props[16]->SetComment("");
 	_props[16]->SetDefaultBoolean(false);
 
+	GetConfig()->SetCategoryComment("Record", "Record Management");
+	char buffer[BUF_SIZE];
+	for (int i = 1; i <= 13; i++)
+	{
+		sprintf(buffer, "Level_%02d", i);
+		_props[16 + i] = GetConfig()->GetProperty("Record", buffer);
+		_props[16 + i]->SetComment("");
+		_props[16 + i]->SetDefaultString("");
+	}
+	
 	RefreshConfig();
 	InitGui();
 }
@@ -220,7 +230,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j - 1][k], T_labels[j][k]->GetText());
+						strcpy(text[j][k - 1], T_labels[j][k]->GetText());
 					delete T_labels[j][k];
 				}
 			}
@@ -228,7 +238,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j - 1][k], _labels[j][k]->GetText());
+						strcpy(text[j][k - 1], _labels[j][k]->GetText());
 					delete _labels[j][k];
 				}
 			}
@@ -238,14 +248,14 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		if (_useNativeFontRendering) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					_labels[j][k]->SetText(text[j - 1][k]);
+					_labels[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
 		else {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					T_labels[j][k]->SetText(text[j - 1][k]);
+					T_labels[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
@@ -330,9 +340,17 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 
 		_segmentCount = i;
 	}
-
+	
 	for (double& i : _segmentTime)
 		i = -1.0;
+	
+	if (!isCustomMap(filename)) {
+		m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &_currentLevel);
+		std::vector<double> segmentTime = split(_props[16 + _currentLevel]->GetString(), ',');
+		for (int i = 0; i < ((segmentTime.size() < _segmentCount) ? segmentTime.size() : _segmentCount); i++) {
+			_segmentTime[i] = segmentTime[i] * 1000.0;
+		}
+	}
 
 	this->srTime = 0;
 	if (_useNativeFontRendering)
@@ -354,8 +372,8 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 			T_labels[i][2]->SetVisible(_enabled);
 		}
 	}
-	for (int i = 0; i < _segmentCount; i++)
-		_segmentTime[i] = -1.0;
+	// for (int i = 0; i < _segmentCount; i++)
+	// 	_segmentTime[i] = -1.0;
 	for (int i = 1; i <= 9; i++) {
 		if (_useNativeFontRendering) {
 			_labels[i - 1][1]->SetText("----");

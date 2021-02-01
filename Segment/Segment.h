@@ -1,5 +1,6 @@
 #pragma once
 #include <BML/BMLAll.h>
+#include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
 constexpr int SEG_PATCH_VER = 21;
@@ -56,7 +57,6 @@ private:
 	int points;
 	int segment = 0;
 	bool counting;
-	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
 	BGui::Text* T_title = nullptr;
 	BGui::Label* _title = nullptr;
@@ -67,7 +67,8 @@ private:
 	BGui::Text* T_labels[9][3];
 	BGui::Label* _labels[9][3];
 	double _segmentTime[9];
-	IProperty* _props[17];
+	IProperty* _props[30];
+	int _currentLevel;
 	double _delta;
 	char _timeString[BUF_SIZE];
 	char _deltaString[BUF_SIZE];
@@ -76,6 +77,23 @@ private:
 	bool _skipEnabled = false;
 	int _skipStep = 60;
 	bool _enabled = true;
+
+	bool isCustomMap(CKSTRING filename)
+	{
+		return std::string(filename).substr(0, 18) == R"(..\ModLoader\Maps\)";
+	}
+
+	std::vector<double> split(const std::string& s, const char delim = ' ') {
+		std::vector<double> vec;
+		std::istringstream iss(s);
+		std::string temp;
+
+		while (getline(iss, temp, delim)) {
+			vec.push_back(stof(temp));
+		}
+		return vec;
+	}
+
 public:
 	Segment(IBML* bml);
 	virtual CKSTRING GetID() override { return "Segment"; }
