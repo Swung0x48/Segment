@@ -86,7 +86,7 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.bmod</TargetExt>
     <IncludePath>$(ProjectDir)include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <OutDir>..\..\..\..\..\Desktop\Ballance-rctest\ModLoader\Mods</OutDir>
+    <OutDir>.\Release</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

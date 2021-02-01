@@ -1,8 +1,9 @@
 #pragma once
 #include <BML/BMLAll.h>
+#include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 21;
+constexpr int SEG_PATCH_VER = 23;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -56,7 +57,6 @@ private:
 	int points;
 	int segment = 0;
 	bool counting;
-	CKDataArray* _currentLevel;
 	BGui::Gui* _gui = nullptr;
 	BGui::Text* T_title = nullptr;
 	BGui::Label* _title = nullptr;
@@ -66,8 +66,9 @@ private:
 	char text[9][2][BUF_SIZE];
 	BGui::Text* T_labels[9][3];
 	BGui::Label* _labels[9][3];
-	double _segmentTime[9];
-	IProperty* _props[17];
+	double _segmentTime[13][9];
+	IProperty* _props[30];
+	int _currentLevel;
 	double _delta;
 	char _timeString[BUF_SIZE];
 	char _deltaString[BUF_SIZE];
@@ -76,6 +77,35 @@ private:
 	bool _skipEnabled = false;
 	int _skipStep = 60;
 	bool _enabled = true;
+
+	bool isCustomMap(CKSTRING filename)
+	{
+		return std::string(filename).substr(0, 18) == R"(..\ModLoader\Maps\)";
+	}
+
+	std::vector<double> split(const std::string& s, const char delim = ' ') {
+		std::vector<double> vec;
+		std::istringstream iss(s);
+		std::string temp;
+
+		while (getline(iss, temp, delim)) {
+			vec.push_back(stof(temp));
+		}
+		return vec;
+	}
+
+	std::string serialize()
+	{
+		bool isFirst = true;
+		std::stringstream ss;
+		for (int i = 0; i < _segmentCount; i++)
+		{
+			ss << (isFirst ? "" : ",") << _segmentTime[_currentLevel - 1][i] / 1000.0;
+			isFirst = false;
+		}
+		std::string ret = ss.str();
+		return ret;
+	}
 public:
 	Segment(IBML* bml);
 	virtual CKSTRING GetID() override { return "Segment"; }
@@ -94,6 +124,7 @@ public:
 	virtual void OnLoad() override;
 	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
 	virtual void OnPreStartMenu() override;
+	void LoadRecordFromConfig();
 	virtual void OnPreEndLevel() override;
 	virtual void OnCounterActive() override;
 	virtual void OnCounterInactive() override;
@@ -105,5 +136,6 @@ public:
 	virtual void OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
 		BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 		XObjectArray* objArray, CKObject* masterObj);
+	virtual void OnPreExitLevel() override;
 };
 

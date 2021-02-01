@@ -18,7 +18,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			T_labels[segment][1]->SetText(_timeString);
 	});
 	_dutySlices.push_back([&]() {
-		double currentTime = _segmentTime[segment];
+		double currentTime = _segmentTime[_currentLevel - 1][segment];
 		_delta = srTime - currentTime;
 		if (currentTime < 0.0)
 			_panel->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
@@ -40,7 +40,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			strcpy(_deltaString, "-9999.999s");
 	});
 	_dutySlices.push_back([&]() {
-		if (_segmentTime[segment] > 0.0) {
+		if (_segmentTime[_currentLevel - 1][segment] > 0.0) {
 			if (_useNativeFontRendering)
 				_labels[segment][2]->SetText(_deltaString);
 			else
@@ -181,12 +181,24 @@ void Segment::OnLoad() {
 	_props[16]->SetComment("");
 	_props[16]->SetDefaultBoolean(false);
 
+	GetConfig()->SetCategoryComment("Record", "Record Management");
+	char buffer[BUF_SIZE];
+	for (int i = 1; i <= 13; i++)
+	{
+		sprintf(buffer, "Level_%02d", i);
+		_props[16 + i] = GetConfig()->GetProperty("Record", buffer);
+		_props[16 + i]->SetComment("");
+		_props[16 + i]->SetDefaultString("");
+	}
+	
 	RefreshConfig();
 	InitGui();
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	RefreshConfig();
+	if (m_bml->IsIngame())
+		LoadRecordFromConfig();
 
 	if (prop == _props[0] && m_bml->IsIngame()) {
 		if (_useNativeFontRendering)
@@ -220,7 +232,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j - 1][k], T_labels[j][k]->GetText());
+						strcpy(text[j][k - 1], T_labels[j][k]->GetText());
 					delete T_labels[j][k];
 				}
 			}
@@ -228,7 +240,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j - 1][k], _labels[j][k]->GetText());
+						strcpy(text[j][k - 1], _labels[j][k]->GetText());
 					delete _labels[j][k];
 				}
 			}
@@ -238,14 +250,14 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		if (_useNativeFontRendering) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					_labels[j][k]->SetText(text[j - 1][k]);
+					_labels[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
 		else {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					T_labels[j][k]->SetText(text[j - 1][k]);
+					T_labels[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
@@ -316,12 +328,21 @@ void Segment::OnPreStartMenu() {
 	}
 }
 
+void Segment::LoadRecordFromConfig()
+{
+	std::vector<double> segmentTime = split(_props[16 + _currentLevel]->GetString(), ',');
+	for (int i = 0; i < ((segmentTime.size() < _segmentCount) ? segmentTime.size() : _segmentCount); i++) {
+		_segmentTime[_currentLevel - 1][i] = segmentTime[i] * 1000.0;
+	}
+}
+
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
-	BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
-	XObjectArray* objArray, CKObject* masterObj) {
+                           BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
+                           XObjectArray* objArray, CKObject* masterObj) {
 	if (!isMap)
 		return;
 
+	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &_currentLevel);
 	char buffer[20];
 	for (int i = 1; i <= 9; i++) {
 		sprintf_s(buffer, "Sector_%02d", i);
@@ -330,9 +351,13 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 
 		_segmentCount = i;
 	}
-
-	for (double& i : _segmentTime)
+	
+	for (double& i : _segmentTime[_currentLevel - 1])
 		i = -1.0;
+	
+	if (!isCustomMap(filename)) {
+		LoadRecordFromConfig();
+	}
 
 	this->srTime = 0;
 	if (_useNativeFontRendering)
@@ -354,8 +379,8 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 			T_labels[i][2]->SetVisible(_enabled);
 		}
 	}
-	for (int i = 0; i < _segmentCount; i++)
-		_segmentTime[i] = -1.0;
+	// for (int i = 0; i < _segmentCount; i++)
+	// 	_segmentTime[i] = -1.0;
 	for (int i = 1; i <= 9; i++) {
 		if (_useNativeFontRendering) {
 			_labels[i - 1][1]->SetText("----");
@@ -368,10 +393,18 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	_background->SetSize(Vx2DVector(PANEL_WIDTH, (float) _segmentCount * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 }
 
+void Segment::OnPreExitLevel()
+{
+	std::string str = serialize();
+	_props[16 + _currentLevel]->SetString(str.c_str());
+}
+
 void Segment::OnPreEndLevel()
 {
-	_segmentTime[segment] = srTime;
+	_segmentTime[_currentLevel - 1][segment] = srTime;
 	segment++;
+	_props[16 + _currentLevel]->SetString(serialize().c_str());
+	
 	_panel->SetVisible(false);
 	this->counting = false;
 	if (_useNativeFontRendering)
@@ -436,8 +469,8 @@ void Segment::OnStartLevel()
 
 void Segment::OnPreCheckpointReached()
 {
-	if (_segmentTime[segment] < 0.0 || srTime < _segmentTime[segment])
-		_segmentTime[segment] = srTime;
+	if (_segmentTime[_currentLevel - 1][segment] < 0.0 || srTime < _segmentTime[_currentLevel - 1][segment])
+		_segmentTime[_currentLevel - 1][segment] = srTime;
 
 	this->segment++;
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
