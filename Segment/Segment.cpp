@@ -331,8 +331,12 @@ void Segment::OnPreStartMenu() {
 void Segment::LoadRecordFromConfig()
 {
 	std::vector<double> segmentTime = split(_props[16 + _currentLevel]->GetString(), ',');
-	for (int i = 0; i < ((segmentTime.size() < _segmentCount) ? segmentTime.size() : _segmentCount); i++) {
-		_segmentTime[_currentLevel - 1][i] = segmentTime[i] * 1000.0;
+	int validSegment = (segmentTime.size() < _segmentCount) ? segmentTime.size() : _segmentCount;
+	for (int i = 0; i < 9; i++) {
+		if (i < validSegment)
+			_segmentTime[_currentLevel - 1][i] = segmentTime[i] * 1000.0;
+		else
+			_segmentTime[_currentLevel - 1][i] = -1.0;
 	}
 }
 
