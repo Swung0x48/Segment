@@ -1,4 +1,5 @@
 #include "Segment.h"
+#include "CommandSeg.h"
 
 IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
@@ -193,6 +194,7 @@ void Segment::OnLoad() {
 	
 	RefreshConfig();
 	InitGui();
+	m_bml->RegisterCommand(new CommandSeg(this->_segmentTime, &(this->_currentLevel)));
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {

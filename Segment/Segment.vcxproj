@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandSeg.h" />
     <ClInclude Include="Segment.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CommandSeg.cpp" />
     <ClCompile Include="Segment.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
