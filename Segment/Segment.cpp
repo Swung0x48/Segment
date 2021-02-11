@@ -465,10 +465,15 @@ void Segment::OnProcess()
 
 void Segment::OnStartLevel()
 {
+	if (m_bml->IsCheatEnabled()) {
+		m_bml->SendIngameMessage("Cheat mode enabled. Segment will stop recording.");
+		m_bml->SendIngameMessage("Disable cheat mode and restart this level to restore.");
+	}
+
 	this->counting = false;
 	this->srTime = 0;
 	this->segment = 0;
-	
+
 	_panel->SetVisible(_enabled);
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
 }
@@ -476,7 +481,8 @@ void Segment::OnStartLevel()
 void Segment::OnPreCheckpointReached()
 {
 	if (_segmentTime[_currentLevel - 1][segment] < 0.0 || srTime < _segmentTime[_currentLevel - 1][segment])
-		_segmentTime[_currentLevel - 1][segment] = srTime;
+		if (!m_bml->IsCheatEnabled())
+			_segmentTime[_currentLevel - 1][segment] = srTime;
 
 	this->segment++;
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
