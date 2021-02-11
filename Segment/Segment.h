@@ -121,6 +121,8 @@ public:
 	void RefreshConfig();
 	void InitGui();
 
+	void ClearRecord();
+
 	virtual void OnLoad() override;
 	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
 	virtual void OnPreStartMenu() override;

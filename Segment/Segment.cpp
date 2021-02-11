@@ -194,7 +194,7 @@ void Segment::OnLoad() {
 	
 	RefreshConfig();
 	InitGui();
-	m_bml->RegisterCommand(new CommandSeg(this->_segmentTime, &(this->_currentLevel)));
+	m_bml->RegisterCommand(new CommandSeg(this));
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
@@ -326,6 +326,19 @@ void Segment::OnPreStartMenu() {
 			T_labels[i - 1][0]->SetVisible(false);
 			T_labels[i - 1][1]->SetVisible(false);
 			T_labels[i - 1][2]->SetVisible(false);
+		}
+	}
+}
+
+void Segment::ClearRecord()
+{
+	for (int i = 1; i <= 9; i++) {
+		_segmentTime[_currentLevel - 1][i - 1] = -1;
+
+		if (_useNativeFontRendering) {
+			_labels[i - 1][2]->SetText("----");
+		} else {
+			T_labels[i - 1][2]->SetText("----");
 		}
 	}
 }
