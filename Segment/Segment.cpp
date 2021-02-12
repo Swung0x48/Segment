@@ -515,6 +515,9 @@ void Segment::OnPreCheckpointReached()
 		if (!m_bml->IsCheatEnabled())
 			_segmentTime[_currentLevel - 1][segment] = srTime;
 
+	for (int i = 0; i < _dutySlices.size() - 1; i++)
+		_dutySlices[i](); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
+
 	this->segment++;
 	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
 
