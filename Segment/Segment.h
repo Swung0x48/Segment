@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 1;
+constexpr int SEG_PATCH_VER = 2;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -41,7 +41,7 @@ private:
 	int LAG_G = 20;
 	int LAG_B = 60;
 	int LAG_A = 200;
-	bool _useNativeFontRendering = true;
+	bool useNativeFontRendering_ = true;
 	char TITLE_FONT[BUF_SIZE] = "Bank Gothic";
 	int TITLE_FONT_SIZE = 20;
 	int TITLE_FONT_WEIGHT = 500;
