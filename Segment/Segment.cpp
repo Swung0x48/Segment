@@ -417,15 +417,15 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	}
 	// for (int i = 0; i < _segmentCount; i++)
 	// 	_segmentTime[i] = -1.0;
-	/*for (int i = 1; i <= 9; i++) {
-		if (_useNativeFontRendering) {
-			_labels[i - 1][1]->SetText("----");
-			_labels[i - 1][2]->SetText("----");
+	for (int i = 1; i <= 9; i++) {
+		if (useNativeFontRendering_) {
+			labels_[i - 1][1]->SetText("----");
+			labels_[i - 1][2]->SetText("----");
 		} else {
-			T_labels[i - 1][1]->SetText("----");
-			T_labels[i - 1][2]->SetText("----");
+			T_labels_[i - 1][1]->SetText("----");
+			T_labels_[i - 1][2]->SetText("----");
 		}
-	}*/
+	}
 	
 	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 }
