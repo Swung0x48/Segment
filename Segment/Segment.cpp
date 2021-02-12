@@ -6,192 +6,192 @@ IMod* BMLEntry(IBML* bml) {
 }
 
 Segment::Segment(IBML* bml) : IMod(bml) {
-	_dutySlices.push_back([&]() {
-		if (srTime / 1000.0 <= 9999.999)
-			sprintf(_timeString, "%.3fs", srTime / 1000.0);
+	dutySlices_.push_back([&]() {
+		if (srTime_ / 1000.0 <= 9999.999)
+			sprintf(timeString_, "%.3fs", srTime_ / 1000.0);
 		else
-			strcpy(_timeString, "9999.999s");
+			strcpy(timeString_, "9999.999s");
 	});
-	_dutySlices.push_back([&]() {
+	dutySlices_.push_back([&]() {
 		if (_useNativeFontRendering)
-			_labels[segment][1]->SetText(_timeString);
+			labels_[segment_][1]->SetText(timeString_);
 		else
-			T_labels[segment][1]->SetText(_timeString);
+			T_labels_[segment_][1]->SetText(timeString_);
 	});
-	_dutySlices.push_back([&]() {
-		double currentTime = _segmentTime[_currentLevel - 1][segment];
+	dutySlices_.push_back([&]() {
+		double currentTime = segmentTime_[currentLevel_ - 1][segment_];
 		if (currentTime < 0.0) {
-			_panel->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
+			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 			return;
 		}
 		
-		_delta = srTime - currentTime;
-		if (_delta < 0.0)
-			_panel->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
-		else if (_delta == 0.0)
-			_panel->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
+		delta_ = srTime_ - currentTime;
+		if (delta_ < 0.0)
+			panel_->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
+		else if (delta_ == 0.0)
+			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 		else
-			_panel->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
+			panel_->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
 		
 	});
-	_dutySlices.push_back([&]() {
-		if (_delta / 1000.0 <= 9999.999 && _delta / 1000.0 >= -9999.999)
-			sprintf(_deltaString, "%+.3fs", _delta / 1000.0f);
-		else if (_delta / 1000.0 > 9999.999)
-			strcpy(_deltaString, "+9999.999s");
+	dutySlices_.push_back([&]() {
+		if (delta_ / 1000.0 <= 9999.999 && delta_ / 1000.0 >= -9999.999)
+			sprintf(deltaString_, "%+.3fs", delta_ / 1000.0f);
+		else if (delta_ / 1000.0 > 9999.999)
+			strcpy(deltaString_, "+9999.999s");
 		else
-			strcpy(_deltaString, "-9999.999s");
+			strcpy(deltaString_, "-9999.999s");
 	});
-	_dutySlices.push_back([&]() {
-		if (_segmentTime[_currentLevel - 1][segment] > 0.0) {
+	dutySlices_.push_back([&]() {
+		if (segmentTime_[currentLevel_ - 1][segment_] > 0.0) {
 			if (_useNativeFontRendering)
-				_labels[segment][2]->SetText(_deltaString);
+				labels_[segment_][2]->SetText(deltaString_);
 			else
-				T_labels[segment][2]->SetText(_deltaString);
+				T_labels_[segment_][2]->SetText(deltaString_);
 		}
 	});
 }
 
 void Segment::RefreshConfig() {
-	_enabled = _props[0]->GetBoolean();
-	_skipEnabled = _props[1]->GetBoolean();
-	_skipStep = _props[2]->GetInteger();
-	sscanf(_props[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
-	sscanf(_props[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
-	sscanf(_props[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
-	_useNativeFontRendering = _props[6]->GetBoolean();
-	strcpy(TITLE_FONT, _props[7]->GetString());
-	TITLE_FONT_SIZE = _props[8]->GetInteger();
-	TITLE_FONT_WEIGHT = _props[9]->GetInteger();
-	TITLE_ITALIC = _props[10]->GetBoolean();
-	TITLE_UNDERLINE = _props[11]->GetBoolean();
-	strcpy(ITEM_FONT, _props[12]->GetString());
-	ITEM_FONT_SIZE = _props[13]->GetInteger();
-	ITEM_FONT_WEIGHT = _props[14]->GetInteger();
-	ITEM_ITALIC = _props[15]->GetBoolean();
-	ITEM_UNDERLINE = _props[16]->GetBoolean();
+	enabled_ = props_[0]->GetBoolean();
+	skipEnabled_ = props_[1]->GetBoolean();
+	skipStep_ = props_[2]->GetInteger();
+	sscanf(props_[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
+	sscanf(props_[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
+	sscanf(props_[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
+	_useNativeFontRendering = props_[6]->GetBoolean();
+	strcpy(TITLE_FONT, props_[7]->GetString());
+	TITLE_FONT_SIZE = props_[8]->GetInteger();
+	TITLE_FONT_WEIGHT = props_[9]->GetInteger();
+	TITLE_ITALIC = props_[10]->GetBoolean();
+	TITLE_UNDERLINE = props_[11]->GetBoolean();
+	strcpy(ITEM_FONT, props_[12]->GetString());
+	ITEM_FONT_SIZE = props_[13]->GetInteger();
+	ITEM_FONT_WEIGHT = props_[14]->GetInteger();
+	ITEM_ITALIC = props_[15]->GetBoolean();
+	ITEM_UNDERLINE = props_[16]->GetBoolean();
 }
 
 void Segment::InitGui()
 {
-	_gui = new BGui::Gui;
-	_panel = _gui->AddPanel("M_Segment_Highlight", VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A), TITLE_X_POS, PANEL_INIT_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
-	_panel->SetZOrder(0);
-	_panel->SetVisible(false);
-	_background = _gui->AddPanel("M_Segment_Background", VxColor(0, 0, 0, 50), TITLE_X_POS, TITLE_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
-	_background->SetZOrder(-1);
-	_background->SetVisible(false);
+	gui_ = new BGui::Gui;
+	panel_ = gui_->AddPanel("M_Segment_Highlight", VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A), TITLE_X_POS, PANEL_INIT_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
+	panel_->SetZOrder(0);
+	panel_->SetVisible(false);
+	background_ = gui_->AddPanel("M_Segment_Background", VxColor(0, 0, 0, 50), TITLE_X_POS, TITLE_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
+	background_->SetZOrder(-1);
+	background_->SetVisible(false);
 
 	if (_useNativeFontRendering)
 	{
-		_title = _gui->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
-		_title->SetZOrder(10);
-		_title->SetAlignment(ALIGN_LEFT);
-		_title->SetVisible(false);
+		title_ = gui_->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+		title_->SetZOrder(10);
+		title_->SetAlignment(ALIGN_LEFT);
+		title_->SetVisible(false);
 	} else {
-		T_title = _gui->AddText("M_Segment_Title", "Segments:", TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
-		T_title->SetZOrder(10);
-		T_title->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
-		T_title->SetAlignment(CKSPRITETEXT_LEFT);
-		T_title->SetVisible(false);
+		T_title_ = gui_->AddText("M_Segment_Title", "Segments:", TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
+		T_title_->SetZOrder(10);
+		T_title_->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
+		T_title_->SetAlignment(CKSPRITETEXT_LEFT);
+		T_title_->SetVisible(false);
 	}
 	
 	char labelText[5] = "#1: ";
 	for (int i = 1; i <= 9; i++) {
 		labelText[1] = i + '0';
 		if (_useNativeFontRendering) {
-			_labels[i - 1][0] = _gui->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			_labels[i - 1][0]->SetAlignment(ALIGN_LEFT);
-			_labels[i - 1][0]->SetVisible(false);
-			_labels[i - 1][1] = _gui->AddTextLabel("M_Segment_Time", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			_labels[i - 1][1]->SetAlignment(ALIGN_CENTER);
-			_labels[i - 1][1]->SetVisible(false);
-			_labels[i - 1][2] = _gui->AddTextLabel("M_Segment_Score", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			_labels[i - 1][2]->SetAlignment(ALIGN_CENTER);
-			_labels[i - 1][2]->SetVisible(false);
+			labels_[i - 1][0] = gui_->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			labels_[i - 1][0]->SetAlignment(ALIGN_LEFT);
+			labels_[i - 1][0]->SetVisible(false);
+			labels_[i - 1][1] = gui_->AddTextLabel("M_Segment_Time", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			labels_[i - 1][1]->SetAlignment(ALIGN_CENTER);
+			labels_[i - 1][1]->SetVisible(false);
+			labels_[i - 1][2] = gui_->AddTextLabel("M_Segment_Score", "----", ExecuteBB::GAMEFONT_01, TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			labels_[i - 1][2]->SetAlignment(ALIGN_CENTER);
+			labels_[i - 1][2]->SetVisible(false);
 		} else {
-			T_labels[i - 1][0] = _gui->AddText("M_Segment_Seg", labelText, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			T_labels[i - 1][0]->SetAlignment(CKSPRITETEXT_LEFT);
-			T_labels[i - 1][0]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-			T_labels[i - 1][0]->SetVisible(false);
-			T_labels[i - 1][1] = _gui->AddText("M_Segment_Time", "----", TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			T_labels[i - 1][1]->SetAlignment(CKSPRITETEXT_CENTER);
-			T_labels[i - 1][1]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-			T_labels[i - 1][1]->SetVisible(false);
-			T_labels[i - 1][2] = _gui->AddText("M_Segment_Score", "----", TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
-			T_labels[i - 1][2]->SetAlignment(CKSPRITETEXT_CENTER);
-			T_labels[i - 1][2]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
-			T_labels[i - 1][2]->SetVisible(false);
+			T_labels_[i - 1][0] = gui_->AddText("M_Segment_Seg", labelText, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			T_labels_[i - 1][0]->SetAlignment(CKSPRITETEXT_LEFT);
+			T_labels_[i - 1][0]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+			T_labels_[i - 1][0]->SetVisible(false);
+			T_labels_[i - 1][1] = gui_->AddText("M_Segment_Time", "----", TITLE_X_POS + TITLE_X_SHIFT + 0.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			T_labels_[i - 1][1]->SetAlignment(CKSPRITETEXT_CENTER);
+			T_labels_[i - 1][1]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+			T_labels_[i - 1][1]->SetVisible(false);
+			T_labels_[i - 1][2] = gui_->AddText("M_Segment_Score", "----", TITLE_X_POS + TITLE_X_SHIFT + 1.0f * ITEM_X_SHIFT, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
+			T_labels_[i - 1][2]->SetAlignment(CKSPRITETEXT_CENTER);
+			T_labels_[i - 1][2]->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
+			T_labels_[i - 1][2]->SetVisible(false);
 		}
 	}
 }
 
 void Segment::OnLoad() {
 	GetConfig()->SetCategoryComment("General", "General Settings");
-	_props[0] = GetConfig()->GetProperty("General", "Enabled?");
-	_props[0]->SetComment("Enable Segment");
-	_props[0]->SetDefaultBoolean(true);
+	props_[0] = GetConfig()->GetProperty("General", "Enabled?");
+	props_[0]->SetComment("Enable Segment");
+	props_[0]->SetDefaultBoolean(true);
 
 	GetConfig()->SetCategoryComment("Tweaking", "Performance Tweaking");
-	_props[1] = GetConfig()->GetProperty("Tweaking", "SkipFrames?");
-	_props[1]->SetComment("Enable frame skipping feature to optimize performance");
-	_props[1]->SetDefaultBoolean(false);
-	_props[2] = GetConfig()->GetProperty("Tweaking", "Skip_Step");
-	_props[2]->SetComment("Skip GUI process every (Skip_Step):1 frame");
-	_props[2]->SetDefaultInteger(240);
-	_props[6] = GetConfig()->GetProperty("Tweaking", "NativeFontRendering");
-	_props[6]->SetComment("");
-	_props[6]->SetDefaultBoolean(true);
+	props_[1] = GetConfig()->GetProperty("Tweaking", "SkipFrames?");
+	props_[1]->SetComment("Enable frame skipping feature to optimize performance");
+	props_[1]->SetDefaultBoolean(false);
+	props_[2] = GetConfig()->GetProperty("Tweaking", "Skip_Step");
+	props_[2]->SetComment("Skip GUI process every (Skip_Step):1 frame");
+	props_[2]->SetDefaultInteger(240);
+	props_[6] = GetConfig()->GetProperty("Tweaking", "NativeFontRendering");
+	props_[6]->SetComment("");
+	props_[6]->SetDefaultBoolean(true);
 
 	GetConfig()->SetCategoryComment("Customize", "Appearance Customize");
-	_props[3] = GetConfig()->GetProperty("Customize", "Lead_Color");
-	_props[3]->SetComment("Leading highlight color, in r,g,b,a format. Default: 50,205,50,200");
-	_props[3]->SetDefaultString("50,205,50,200");
-	_props[4] = GetConfig()->GetProperty("Customize", "Even_Color");
-	_props[4]->SetComment("Leading or default highlight color, in r,g,b,a format. Default: 255,168,0,200");
-	_props[4]->SetDefaultString("255,168,0,200");
-	_props[5] = GetConfig()->GetProperty("Customize", "Lag_Color");
-	_props[5]->SetComment("Lagging highlight color, in r,g,b,a format. Default: 220,20,60,200");
-	_props[5]->SetDefaultString("220,20,60,200");
-	_props[7] = GetConfig()->GetProperty("Customize", "Title_Font");
-	_props[7]->SetComment("");
-	_props[7]->SetDefaultString("Bank Gothic");
-	_props[8] = GetConfig()->GetProperty("Customize", "Title_Font_Size");
-	_props[8]->SetComment("");
-	_props[8]->SetDefaultInteger(20);
-	_props[9] = GetConfig()->GetProperty("Customize", "Title_Font_Weight");
-	_props[9]->SetComment("");
-	_props[9]->SetDefaultInteger(500);
-	_props[10] = GetConfig()->GetProperty("Customize", "Title_Italic");
-	_props[10]->SetComment("");
-	_props[10]->SetDefaultBoolean(false);
-	_props[11] = GetConfig()->GetProperty("Customize", "Title_Underline");
-	_props[11]->SetComment("");
-	_props[11]->SetDefaultBoolean(false);
-	_props[12] = GetConfig()->GetProperty("Customize", "Item_Font");
-	_props[12]->SetComment("");
-	_props[12]->SetDefaultString("Bank Gothic");
-	_props[13] = GetConfig()->GetProperty("Customize", "Item_Font_Size");
-	_props[13]->SetComment("");
-	_props[13]->SetDefaultInteger(20);
-	_props[14] = GetConfig()->GetProperty("Customize", "Item_Font_Weight");
-	_props[14]->SetComment("");
-	_props[14]->SetDefaultInteger(500);
-	_props[15] = GetConfig()->GetProperty("Customize", "Item_Italic");
-	_props[15]->SetComment("");
-	_props[15]->SetDefaultBoolean(false);
-	_props[16] = GetConfig()->GetProperty("Customize", "Item_Underline");
-	_props[16]->SetComment("");
-	_props[16]->SetDefaultBoolean(false);
+	props_[3] = GetConfig()->GetProperty("Customize", "Lead_Color");
+	props_[3]->SetComment("Leading highlight color, in r,g,b,a format. Default: 50,205,50,200");
+	props_[3]->SetDefaultString("50,205,50,200");
+	props_[4] = GetConfig()->GetProperty("Customize", "Even_Color");
+	props_[4]->SetComment("Leading or default highlight color, in r,g,b,a format. Default: 255,168,0,200");
+	props_[4]->SetDefaultString("255,168,0,200");
+	props_[5] = GetConfig()->GetProperty("Customize", "Lag_Color");
+	props_[5]->SetComment("Lagging highlight color, in r,g,b,a format. Default: 220,20,60,200");
+	props_[5]->SetDefaultString("220,20,60,200");
+	props_[7] = GetConfig()->GetProperty("Customize", "Title_Font");
+	props_[7]->SetComment("");
+	props_[7]->SetDefaultString("Bank Gothic");
+	props_[8] = GetConfig()->GetProperty("Customize", "Title_Font_Size");
+	props_[8]->SetComment("");
+	props_[8]->SetDefaultInteger(20);
+	props_[9] = GetConfig()->GetProperty("Customize", "Title_Font_Weight");
+	props_[9]->SetComment("");
+	props_[9]->SetDefaultInteger(500);
+	props_[10] = GetConfig()->GetProperty("Customize", "Title_Italic");
+	props_[10]->SetComment("");
+	props_[10]->SetDefaultBoolean(false);
+	props_[11] = GetConfig()->GetProperty("Customize", "Title_Underline");
+	props_[11]->SetComment("");
+	props_[11]->SetDefaultBoolean(false);
+	props_[12] = GetConfig()->GetProperty("Customize", "Item_Font");
+	props_[12]->SetComment("");
+	props_[12]->SetDefaultString("Bank Gothic");
+	props_[13] = GetConfig()->GetProperty("Customize", "Item_Font_Size");
+	props_[13]->SetComment("");
+	props_[13]->SetDefaultInteger(20);
+	props_[14] = GetConfig()->GetProperty("Customize", "Item_Font_Weight");
+	props_[14]->SetComment("");
+	props_[14]->SetDefaultInteger(500);
+	props_[15] = GetConfig()->GetProperty("Customize", "Item_Italic");
+	props_[15]->SetComment("");
+	props_[15]->SetDefaultBoolean(false);
+	props_[16] = GetConfig()->GetProperty("Customize", "Item_Underline");
+	props_[16]->SetComment("");
+	props_[16]->SetDefaultBoolean(false);
 
 	GetConfig()->SetCategoryComment("Record", "Record Management");
 	char buffer[BUF_SIZE];
 	for (int i = 1; i <= 13; i++)
 	{
 		sprintf(buffer, "Level_%02d", i);
-		_props[16 + i] = GetConfig()->GetProperty("Record", buffer);
-		_props[16 + i]->SetComment("");
-		_props[16 + i]->SetDefaultString("");
+		props_[16 + i] = GetConfig()->GetProperty("Record", buffer);
+		props_[16 + i]->SetComment("");
+		props_[16 + i]->SetDefaultString("");
 	}
 	
 	RefreshConfig();
@@ -204,84 +204,84 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	if (m_bml->IsIngame())
 		LoadRecordFromConfig();
 
-	if (prop == _props[0] && m_bml->IsIngame()) {
+	if (prop == props_[0] && m_bml->IsIngame()) {
 		if (_useNativeFontRendering)
-			_title->SetVisible(_enabled);
+			title_->SetVisible(enabled_);
 		else
-			T_title->SetVisible(_enabled);
-		_panel->SetVisible(_enabled);
-		_background->SetVisible(_enabled);
-		for (int i = 0; i < _segmentCount; i++) {
+			T_title_->SetVisible(enabled_);
+		panel_->SetVisible(enabled_);
+		background_->SetVisible(enabled_);
+		for (int i = 0; i < segmentCount_; i++) {
 			if (_useNativeFontRendering) {
-				_labels[i][0]->SetVisible(_enabled);
-				_labels[i][1]->SetVisible(_enabled);
-				_labels[i][2]->SetVisible(_enabled);
+				labels_[i][0]->SetVisible(enabled_);
+				labels_[i][1]->SetVisible(enabled_);
+				labels_[i][2]->SetVisible(enabled_);
 			} else {
-				T_labels[i][0]->SetVisible(_enabled);
-				T_labels[i][1]->SetVisible(_enabled);
-				T_labels[i][2]->SetVisible(_enabled);
+				T_labels_[i][0]->SetVisible(enabled_);
+				T_labels_[i][1]->SetVisible(enabled_);
+				T_labels_[i][2]->SetVisible(enabled_);
 			}
 		}
 	} 
 	
-	if (prop == _props[6]) {
-		delete _title;
-		delete T_title;
-		_title = nullptr;
-		T_title = nullptr;
-		delete _panel;
-		delete _background;
+	if (prop == props_[6]) {
+		delete title_;
+		delete T_title_;
+		title_ = nullptr;
+		T_title_ = nullptr;
+		delete panel_;
+		delete background_;
 
 		if (_useNativeFontRendering) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j][k - 1], T_labels[j][k]->GetText());
-					delete T_labels[j][k];
+						strcpy(text[j][k - 1], T_labels_[j][k]->GetText());
+					delete T_labels_[j][k];
 				}
 			}
 		} else {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
-						strcpy(text[j][k - 1], _labels[j][k]->GetText());
-					delete _labels[j][k];
+						strcpy(text[j][k - 1], labels_[j][k]->GetText());
+					delete labels_[j][k];
 				}
 			}
 		}
-		delete _gui;
+		delete gui_;
 		InitGui();
 		if (_useNativeFontRendering) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					_labels[j][k]->SetText(text[j][k - 1]);
+					labels_[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
 		else {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
-					T_labels[j][k]->SetText(text[j][k - 1]);
+					T_labels_[j][k]->SetText(text[j][k - 1]);
 				}
 			}
 		}
-		_panel->SetVisible(_enabled && m_bml->IsIngame());
-		_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
-		_background->SetVisible(_enabled && m_bml->IsIngame());
-		_background->SetSize(Vx2DVector(PANEL_WIDTH, (float)_segmentCount * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
-		for (int i = 0; i < _segmentCount; i++)
+		panel_->SetVisible(enabled_ && m_bml->IsIngame());
+		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+		background_->SetVisible(enabled_ && m_bml->IsIngame());
+		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+		for (int i = 0; i < segmentCount_; i++)
 		{
 			if (_useNativeFontRendering) {
-				_title->SetVisible(_enabled && m_bml->IsIngame());
-				for (auto* j: _labels[i])
+				title_->SetVisible(enabled_ && m_bml->IsIngame());
+				for (auto* j: labels_[i])
 				{
-					j->SetVisible(_enabled && m_bml->IsIngame());
+					j->SetVisible(enabled_ && m_bml->IsIngame());
 				}
 			} else {
-				T_title->SetVisible(_enabled && m_bml->IsIngame());
-				for (auto* j : T_labels[i])
+				T_title_->SetVisible(enabled_ && m_bml->IsIngame());
+				for (auto* j : T_labels_[i])
 				{
-					j->SetVisible(_enabled && m_bml->IsIngame());
+					j->SetVisible(enabled_ && m_bml->IsIngame());
 				}
 			}
 		}
@@ -290,8 +290,8 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	for (int i = 7; i <= 11; i++) {
 		if (_useNativeFontRendering)
 			break;
-		if (prop == _props[i]) {
-			T_title->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
+		if (prop == props_[i]) {
+			T_title_->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
 			break;
 		}
 	}
@@ -299,8 +299,8 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	for (int i = 12; i <= 16; i++) {
 		if (_useNativeFontRendering)
 			break;
-		if (prop == _props[i]) {
-			for (auto& j: T_labels) {
+		if (prop == props_[i]) {
+			for (auto& j: T_labels_) {
 				for (auto& k : j)
 					k->SetFont(ITEM_FONT, ITEM_FONT_SIZE, ITEM_FONT_WEIGHT, ITEM_ITALIC, ITEM_UNDERLINE);
 			}
@@ -310,24 +310,24 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 }
 
 void Segment::OnPreStartMenu() {
-	if (_panel != nullptr)
-		_panel->SetVisible(false);
-	if (_background != nullptr)
-		_background->SetVisible(false);
+	if (panel_ != nullptr)
+		panel_->SetVisible(false);
+	if (background_ != nullptr)
+		background_->SetVisible(false);
 	if (_useNativeFontRendering)
-		_title->SetVisible(false);
+		title_->SetVisible(false);
 	else
-		T_title->SetVisible(false);
+		T_title_->SetVisible(false);
 	for (int i = 1; i <= 9; i++) {
 		if (_useNativeFontRendering)
 		{
-			_labels[i - 1][0]->SetVisible(false);
-			_labels[i - 1][1]->SetVisible(false);
-			_labels[i - 1][2]->SetVisible(false);
+			labels_[i - 1][0]->SetVisible(false);
+			labels_[i - 1][1]->SetVisible(false);
+			labels_[i - 1][2]->SetVisible(false);
 		} else {
-			T_labels[i - 1][0]->SetVisible(false);
-			T_labels[i - 1][1]->SetVisible(false);
-			T_labels[i - 1][2]->SetVisible(false);
+			T_labels_[i - 1][0]->SetVisible(false);
+			T_labels_[i - 1][1]->SetVisible(false);
+			T_labels_[i - 1][2]->SetVisible(false);
 		}
 	}
 }
@@ -335,25 +335,25 @@ void Segment::OnPreStartMenu() {
 void Segment::ClearRecord()
 {
 	for (int i = 1; i <= 9; i++) {
-		_segmentTime[_currentLevel - 1][i - 1] = -1;
+		segmentTime_[currentLevel_ - 1][i - 1] = -1;
 
 		if (_useNativeFontRendering) {
-			_labels[i - 1][2]->SetText("----");
+			labels_[i - 1][2]->SetText("----");
 		} else {
-			T_labels[i - 1][2]->SetText("----");
+			T_labels_[i - 1][2]->SetText("----");
 		}
 	}
 }
 
 void Segment::LoadRecordFromConfig()
 {
-	std::vector<double> segmentTime = split(_props[16 + _currentLevel]->GetString(), ',');
-	int validSegment = (segmentTime.size() < _segmentCount) ? segmentTime.size() : _segmentCount;
+	std::vector<double> segmentTime = split(props_[16 + currentLevel_]->GetString(), ',');
+	int validSegment = (segmentTime.size() < segmentCount_) ? segmentTime.size() : segmentCount_;
 	for (int i = 0; i < 9; i++) {
 		if (i < validSegment)
-			_segmentTime[_currentLevel - 1][i] = segmentTime[i] * 1000.0;
+			segmentTime_[currentLevel_ - 1][i] = segmentTime[i] * 1000.0;
 		else
-			_segmentTime[_currentLevel - 1][i] = -1.0;
+			segmentTime_[currentLevel_ - 1][i] = -1.0;
 	}
 }
 
@@ -363,24 +363,24 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	if (!isMap)
 		return;
 
-	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &_currentLevel);
+	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &currentLevel_);
 	char buffer[BUF_SIZE];
 	for (int i = 1; i <= 9; i++) {
 		sprintf_s(buffer, "Sector_%02d", i);
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
 
-		_segmentCount = i;
+		segmentCount_ = i;
 	}
 	
-	for (double& i : _segmentTime[_currentLevel - 1])
+	for (double& i : segmentTime_[currentLevel_ - 1])
 		i = -1.0;
 	
 	if (!isCustomMap(filename)) {
 		LoadRecordFromConfig();
 	}
-	for (int i = 0; i < _segmentCount; i++) {
-		double time = -1 * _segmentTime[_currentLevel - 1][i] / 1000.0;
+	for (int i = 0; i < segmentCount_; i++) {
+		double time = -1 * segmentTime_[currentLevel_ - 1][i] / 1000.0;
 		if (time > 0.0) continue;
 		if (time / 1000.0 <= 9999.999)
 			sprintf(buffer, "%.3lfs", time);
@@ -389,30 +389,30 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		
 		//sprintf(buffer, "%.3lfs", time);
 		if (_useNativeFontRendering) {
-			_labels[i][2]->SetText(buffer);
+			labels_[i][2]->SetText(buffer);
 		} else {
-			T_labels[i][2]->SetText(buffer);
+			T_labels_[i][2]->SetText(buffer);
 		}
 	}
 
-	this->srTime = 0;
+	this->srTime_ = 0;
 	if (_useNativeFontRendering)
-		_title->SetVisible(_enabled);
+		title_->SetVisible(enabled_);
 	else
-		T_title->SetVisible(_enabled);
-	_panel->SetVisible(_enabled);
-	_background->SetVisible(_enabled);
-	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
-	for (int i = 0; i < _segmentCount; i++) {
+		T_title_->SetVisible(enabled_);
+	panel_->SetVisible(enabled_);
+	background_->SetVisible(enabled_);
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+	for (int i = 0; i < segmentCount_; i++) {
 		if (_useNativeFontRendering)
 		{
-			_labels[i][0]->SetVisible(_enabled);
-			_labels[i][1]->SetVisible(_enabled);
-			_labels[i][2]->SetVisible(_enabled);
+			labels_[i][0]->SetVisible(enabled_);
+			labels_[i][1]->SetVisible(enabled_);
+			labels_[i][2]->SetVisible(enabled_);
 		} else {
-			T_labels[i][0]->SetVisible(_enabled);
-			T_labels[i][1]->SetVisible(_enabled);
-			T_labels[i][2]->SetVisible(_enabled);
+			T_labels_[i][0]->SetVisible(enabled_);
+			T_labels_[i][1]->SetVisible(enabled_);
+			T_labels_[i][2]->SetVisible(enabled_);
 		}
 	}
 	// for (int i = 0; i < _segmentCount; i++)
@@ -427,66 +427,66 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		}
 	}*/
 	
-	_background->SetSize(Vx2DVector(PANEL_WIDTH, (float) _segmentCount * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 }
 
 void Segment::OnPreExitLevel()
 {
 	std::string str = serialize();
-	_props[16 + _currentLevel]->SetString(str.c_str());
+	props_[16 + currentLevel_]->SetString(str.c_str());
 }
 
 void Segment::OnPreEndLevel()
 {
-	_segmentTime[_currentLevel - 1][segment] = srTime;
-	segment++;
-	_props[16 + _currentLevel]->SetString(serialize().c_str());
+	segmentTime_[currentLevel_ - 1][segment_] = srTime_;
+	segment_++;
+	props_[16 + currentLevel_]->SetString(serialize().c_str());
 	
-	_panel->SetVisible(false);
-	this->counting = false;
+	panel_->SetVisible(false);
+	this->counting_ = false;
 	if (_useNativeFontRendering)
-		_gui->Process();
+		gui_->Process();
 }
 
 void Segment::OnCounterActive()
 {
-	this->counting = true;
+	this->counting_ = true;
 }
 
 void Segment::OnCounterInactive()
 {	
-	this->counting = false;
+	this->counting_ = false;
 }
 
 void Segment::OnPauseLevel()
 {
-	this->counting = false;
+	this->counting_ = false;
 }
 
 void Segment::OnUnpauseLevel()
 {
-	this->counting = true;
+	this->counting_ = true;
 }
 
 void Segment::OnProcess()
 {
-	_loopCount++;
+	loopCount_++;
 
-	if (this->counting)
-		this->srTime += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
+	if (this->counting_)
+		this->srTime_ += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
 	
 
-	if (_enabled) {
+	if (enabled_) {
 		if (m_bml->IsIngame()) {
-			_dutySlices[_loopCount % _dutySlices.size()]();
+			dutySlices_[loopCount_ % dutySlices_.size()]();
 
 			if (_useNativeFontRendering) {
-				if (_loopCount % _skipStep != 0 || !_skipEnabled) {
-					_title->Process();
-					for (int i = 0; i < _segmentCount; i++) {
-						_labels[i][0]->Process();
-						_labels[i][1]->Process();
-						_labels[i][2]->Process();
+				if (loopCount_ % skipStep_ != 0 || !skipEnabled_) {
+					title_->Process();
+					for (int i = 0; i < segmentCount_; i++) {
+						labels_[i][0]->Process();
+						labels_[i][1]->Process();
+						labels_[i][2]->Process();
 					}
 				}
 			}
@@ -501,25 +501,25 @@ void Segment::OnStartLevel()
 		m_bml->SendIngameMessage("Disable cheat mode and restart this level to restore.");
 	}
 
-	this->counting = false;
-	this->srTime = 0;
-	this->segment = 0;
+	this->counting_ = false;
+	this->srTime_ = 0;
+	this->segment_ = 0;
 
-	_panel->SetVisible(_enabled);
-	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
+	panel_->SetVisible(enabled_);
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
 }
 
 void Segment::OnPreCheckpointReached()
 {
-	if (_segmentTime[_currentLevel - 1][segment] < 0.0 || srTime < _segmentTime[_currentLevel - 1][segment])
+	if (segmentTime_[currentLevel_ - 1][segment_] < 0.0 || srTime_ < segmentTime_[currentLevel_ - 1][segment_])
 		if (!m_bml->IsCheatEnabled())
-			_segmentTime[_currentLevel - 1][segment] = srTime;
+			segmentTime_[currentLevel_ - 1][segment_] = srTime_;
 
-	for (int i = 0; i < _dutySlices.size() - 1; i++)
-		_dutySlices[i](); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
+	for (int i = 0; i < dutySlices_.size() - 1; i++)
+		dutySlices_[i](); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
-	this->segment++;
-	_panel->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment) * PANEL_Y_SHIFT));
+	this->segment_++;
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
 
-	srTime = 0;
+	srTime_ = 0;
 }

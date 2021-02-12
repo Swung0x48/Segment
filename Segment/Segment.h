@@ -53,30 +53,30 @@ private:
 	bool ITEM_ITALIC = false;
 	bool ITEM_UNDERLINE = false;
 
-	double srTime = 0;
-	int points;
-	int segment = 0;
-	bool counting;
-	BGui::Gui* _gui = nullptr;
-	BGui::Text* T_title = nullptr;
-	BGui::Label* _title = nullptr;
-	BGui::Panel* _panel = nullptr;
-	BGui::Panel* _background = nullptr;
-	int _segmentCount = 0;
+	double srTime_ = 0;
+	int points_;
+	int segment_ = 0;
+	bool counting_;
+	BGui::Gui* gui_ = nullptr;
+	BGui::Text* T_title_ = nullptr;
+	BGui::Label* title_ = nullptr;
+	BGui::Panel* panel_ = nullptr;
+	BGui::Panel* background_ = nullptr;
+	int segmentCount_ = 0;
 	char text[9][2][BUF_SIZE];
-	BGui::Text* T_labels[9][3];
-	BGui::Label* _labels[9][3];
-	double _segmentTime[13][9];
-	IProperty* _props[30];
-	int _currentLevel;
-	double _delta;
-	char _timeString[BUF_SIZE];
-	char _deltaString[BUF_SIZE];
-	long long _loopCount = 0;
-	std::vector<std::function<void()>> _dutySlices;
-	bool _skipEnabled = false;
-	int _skipStep = 60;
-	bool _enabled = true;
+	BGui::Text* T_labels_[9][3];
+	BGui::Label* labels_[9][3];
+	double segmentTime_[13][9];
+	IProperty* props_[30];
+	int currentLevel_;
+	double delta_;
+	char timeString_[BUF_SIZE];
+	char deltaString_[BUF_SIZE];
+	long long loopCount_ = 0;
+	std::vector<std::function<void()>> dutySlices_;
+	bool skipEnabled_ = false;
+	int skipStep_ = 60;
+	bool enabled_ = true;
 
 	bool isCustomMap(CKSTRING filename)
 	{
@@ -98,9 +98,9 @@ private:
 	{
 		bool isFirst = true;
 		std::stringstream ss;
-		for (int i = 0; i < _segmentCount; i++)
+		for (int i = 0; i < segmentCount_; i++)
 		{
-			ss << (isFirst ? "" : ",") << _segmentTime[_currentLevel - 1][i] / 1000.0;
+			ss << (isFirst ? "" : ",") << segmentTime_[currentLevel_ - 1][i] / 1000.0;
 			isFirst = false;
 		}
 		std::string ret = ss.str();
