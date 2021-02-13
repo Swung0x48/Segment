@@ -375,25 +375,6 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	
 	for (double& i : segmentTime_[currentLevel_ - 1])
 		i = -1.0;
-	
-	if (!isCustomMap(filename)) {
-		LoadRecordFromConfig();
-	}
-	for (int i = 0; i < segmentCount_; i++) {
-		double time = -1 * segmentTime_[currentLevel_ - 1][i] / 1000.0;
-		if (time > 0.0) continue;
-		if (time / 1000.0 <= 9999.999)
-			sprintf(buffer, "%.3lfs", time);
-		else
-			strcpy(buffer, "-9999.999s");
-		
-		//sprintf(buffer, "%.3lfs", time);
-		if (useNativeFontRendering_) {
-			labels_[i][2]->SetText(buffer);
-		} else {
-			T_labels_[i][2]->SetText(buffer);
-		}
-	}
 
 	this->srTime_ = 0;
 	if (useNativeFontRendering_)
@@ -428,12 +409,42 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	}
 	
 	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+
+	if (!isCustomMap(filename)) {
+		LoadRecordFromConfig();
+	}
+	for (int i = 0; i < segmentCount_; i++) {
+		double time = -1.0 * segmentTime_[currentLevel_ - 1][i] / 1000.0;
+		if (time > 0.0) continue;
+		if (time <= 9999.999)
+			sprintf(buffer, "%.3lfs", time);
+		else
+			strcpy(buffer, "-9999.999s");
+
+		//sprintf(buffer, "%.3lfs", time);
+		if (useNativeFontRendering_) {
+			labels_[i][2]->SetText(buffer);
+		}
+		else {
+			T_labels_[i][2]->SetText(buffer);
+		}
+	}
 }
 
 void Segment::OnPreExitLevel()
 {
 	std::string str = serialize();
 	props_[16 + currentLevel_]->SetString(str.c_str());
+}
+
+void Segment::OnCheatEnabled(bool enable)
+{
+	if (enable) {
+		m_bml->SendIngameMessage("Cheat mode enabled. Segment will stop recording.");
+		m_bml->SendIngameMessage("Disable cheat mode to restore.");
+	} else {
+		m_bml->SendIngameMessage("Cheat mode disabled. Segment will now start recording.");
+	}
 }
 
 void Segment::OnPreEndLevel()
@@ -496,11 +507,6 @@ void Segment::OnProcess()
 
 void Segment::OnStartLevel()
 {
-	if (m_bml->IsCheatEnabled()) {
-		m_bml->SendIngameMessage("Cheat mode enabled. Segment will stop recording.");
-		m_bml->SendIngameMessage("Disable cheat mode and restart this level to restore.");
-	}
-
 	this->counting_ = false;
 	this->srTime_ = 0;
 	this->segment_ = 0;

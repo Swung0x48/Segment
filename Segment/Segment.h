@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 2;
+constexpr int SEG_PATCH_VER = 4;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -139,5 +139,6 @@ public:
 		BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
 		XObjectArray* objArray, CKObject* masterObj);
 	virtual void OnPreExitLevel() override;
+	virtual void OnCheatEnabled(bool enable) override;
 };
 
