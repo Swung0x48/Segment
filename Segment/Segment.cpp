@@ -70,6 +70,7 @@ void Segment::RefreshConfig() {
 	ITEM_FONT_WEIGHT = props_[14]->GetInteger();
 	ITEM_ITALIC = props_[15]->GetBoolean();
 	ITEM_UNDERLINE = props_[16]->GetBoolean();
+	update_enabled_ = props_[17]->GetBoolean();
 }
 
 void Segment::InitGui()
@@ -185,13 +186,16 @@ void Segment::OnLoad() {
 	props_[16]->SetDefaultBoolean(false);
 
 	GetConfig()->SetCategoryComment("Record", "Record Management");
+	props_[17] = GetConfig()->GetProperty("Record", "EnableUpdating");
+	props_[17]->SetComment("Set this to false will stop your record from updating. Ideal for comparing with a fixed record.");
+	props_[17]->SetDefaultBoolean(true);
 	char buffer[BUF_SIZE];
 	for (int i = 1; i <= 13; i++)
 	{
 		sprintf(buffer, "Level_%02d", i);
-		props_[16 + i] = GetConfig()->GetProperty("Record", buffer);
-		props_[16 + i]->SetComment("");
-		props_[16 + i]->SetDefaultString("");
+		props_[17 + i] = GetConfig()->GetProperty("Record", buffer);
+		props_[17 + i]->SetComment("");
+		props_[17 + i]->SetDefaultString("");
 	}
 	
 	RefreshConfig();
@@ -521,7 +525,7 @@ void Segment::OnPreCheckpointReached()
 		dutySlice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
 	if (segment_time_[current_level_ - 1][segment_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][segment_])
-		if (!m_bml->IsCheatEnabled())
+		if (!m_bml->IsCheatEnabled() && update_enabled_)
 			segment_time_[current_level_ - 1][segment_] = sr_time_;
 
 	this->segment_++;

@@ -78,6 +78,7 @@ private:
 	bool skip_enabled_ = false;
 	int skip_step_ = 60;
 	bool segment_enabled_ = true;
+	bool update_enabled_ = true;
 
 	bool isCustomMap(CKSTRING filename)
 	{
