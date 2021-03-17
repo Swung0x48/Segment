@@ -6,26 +6,26 @@ IMod* BMLEntry(IBML* bml) {
 }
 
 Segment::Segment(IBML* bml) : IMod(bml) {
-	dutySlices_.push_back([&]() {
-		if (srTime_ / 1000.0 <= 9999.999)
-			sprintf(timeString_, "%.3fs", srTime_ / 1000.0);
+	duty_slices_.push_back([&]() {
+		if (sr_time_ / 1000.0 <= 9999.999)
+			sprintf(time_string_, "%.3fs", sr_time_ / 1000.0);
 		else
-			strcpy(timeString_, "9999.999s");
+			strcpy(time_string_, "9999.999s");
 	});
-	dutySlices_.push_back([&]() {
+	duty_slices_.push_back([&]() {
 		if (useNativeFontRendering_)
-			labels_[segment_][1]->SetText(timeString_);
+			labels_[segment_][1]->SetText(time_string_);
 		else
-			T_labels_[segment_][1]->SetText(timeString_);
+			T_labels_[segment_][1]->SetText(time_string_);
 	});
-	dutySlices_.push_back([&]() {
-		double currentTime = segmentTime_[currentLevel_ - 1][segment_];
+	duty_slices_.push_back([&]() {
+		double currentTime = segment_time_[current_level_ - 1][segment_];
 		if (currentTime < 0.0) {
 			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 			return;
 		}
 		
-		delta_ = srTime_ - currentTime;
+		delta_ = sr_time_ - currentTime;
 		if (delta_ < 0.0)
 			panel_->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
 		else if (delta_ == 0.0)
@@ -34,28 +34,28 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			panel_->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
 		
 	});
-	dutySlices_.push_back([&]() {
+	duty_slices_.push_back([&]() {
 		if (delta_ / 1000.0 <= 9999.999 && delta_ / 1000.0 >= -9999.999)
-			sprintf(deltaString_, "%+.3fs", delta_ / 1000.0f);
+			sprintf(delta_string_, "%+.3fs", delta_ / 1000.0f);
 		else if (delta_ / 1000.0 > 9999.999)
-			strcpy(deltaString_, "+9999.999s");
+			strcpy(delta_string_, "+9999.999s");
 		else
-			strcpy(deltaString_, "-9999.999s");
+			strcpy(delta_string_, "-9999.999s");
 	});
-	dutySlices_.push_back([&]() {
-		if (segmentTime_[currentLevel_ - 1][segment_] > 0.0) {
+	duty_slices_.push_back([&]() {
+		if (segment_time_[current_level_ - 1][segment_] > 0.0) {
 			if (useNativeFontRendering_)
-				labels_[segment_][2]->SetText(deltaString_);
+				labels_[segment_][2]->SetText(delta_string_);
 			else
-				T_labels_[segment_][2]->SetText(deltaString_);
+				T_labels_[segment_][2]->SetText(delta_string_);
 		}
 	});
 }
 
 void Segment::RefreshConfig() {
-	enabled_ = props_[0]->GetBoolean();
-	skipEnabled_ = props_[1]->GetBoolean();
-	skipStep_ = props_[2]->GetInteger();
+	segment_enabled_ = props_[0]->GetBoolean();
+	skip_enabled_ = props_[1]->GetBoolean();
+	skip_step_ = props_[2]->GetInteger();
 	sscanf(props_[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
 	sscanf(props_[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
 	sscanf(props_[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
@@ -206,20 +206,20 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 
 	if (prop == props_[0] && m_bml->IsIngame()) {
 		if (useNativeFontRendering_)
-			title_->SetVisible(enabled_);
+			title_->SetVisible(segment_enabled_);
 		else
-			T_title_->SetVisible(enabled_);
-		panel_->SetVisible(enabled_);
-		background_->SetVisible(enabled_);
-		for (int i = 0; i < segmentCount_; i++) {
+			T_title_->SetVisible(segment_enabled_);
+		panel_->SetVisible(segment_enabled_);
+		background_->SetVisible(segment_enabled_);
+		for (int i = 0; i < segment_count_; i++) {
 			if (useNativeFontRendering_) {
-				labels_[i][0]->SetVisible(enabled_);
-				labels_[i][1]->SetVisible(enabled_);
-				labels_[i][2]->SetVisible(enabled_);
+				labels_[i][0]->SetVisible(segment_enabled_);
+				labels_[i][1]->SetVisible(segment_enabled_);
+				labels_[i][2]->SetVisible(segment_enabled_);
 			} else {
-				T_labels_[i][0]->SetVisible(enabled_);
-				T_labels_[i][1]->SetVisible(enabled_);
-				T_labels_[i][2]->SetVisible(enabled_);
+				T_labels_[i][0]->SetVisible(segment_enabled_);
+				T_labels_[i][1]->SetVisible(segment_enabled_);
+				T_labels_[i][2]->SetVisible(segment_enabled_);
 			}
 		}
 	} 
@@ -265,23 +265,23 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 				}
 			}
 		}
-		panel_->SetVisible(enabled_ && m_bml->IsIngame());
+		panel_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
-		background_->SetVisible(enabled_ && m_bml->IsIngame());
-		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
-		for (int i = 0; i < segmentCount_; i++)
+		background_->SetVisible(segment_enabled_ && m_bml->IsIngame());
+		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+		for (int i = 0; i < segment_count_; i++)
 		{
 			if (useNativeFontRendering_) {
-				title_->SetVisible(enabled_ && m_bml->IsIngame());
+				title_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 				for (auto* j: labels_[i])
 				{
-					j->SetVisible(enabled_ && m_bml->IsIngame());
+					j->SetVisible(segment_enabled_ && m_bml->IsIngame());
 				}
 			} else {
-				T_title_->SetVisible(enabled_ && m_bml->IsIngame());
+				T_title_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 				for (auto* j : T_labels_[i])
 				{
-					j->SetVisible(enabled_ && m_bml->IsIngame());
+					j->SetVisible(segment_enabled_ && m_bml->IsIngame());
 				}
 			}
 		}
@@ -335,7 +335,7 @@ void Segment::OnPreStartMenu() {
 void Segment::ClearRecord()
 {
 	for (int i = 1; i <= 9; i++) {
-		segmentTime_[currentLevel_ - 1][i - 1] = -1;
+		segment_time_[current_level_ - 1][i - 1] = -1;
 
 		if (useNativeFontRendering_) {
 			labels_[i - 1][2]->SetText("----");
@@ -347,13 +347,13 @@ void Segment::ClearRecord()
 
 void Segment::LoadRecordFromConfig()
 {
-	std::vector<double> segmentTime = split(props_[16 + currentLevel_]->GetString(), ',');
-	int validSegment = (segmentTime.size() < segmentCount_) ? segmentTime.size() : segmentCount_;
+	std::vector<double> segmentTime = split(props_[16 + current_level_]->GetString(), ',');
+	int validSegment = (segmentTime.size() < segment_count_) ? segmentTime.size() : segment_count_;
 	for (int i = 0; i < 9; i++) {
 		if (i < validSegment)
-			segmentTime_[currentLevel_ - 1][i] = segmentTime[i] * 1000.0;
+			segment_time_[current_level_ - 1][i] = segmentTime[i] * 1000.0;
 		else
-			segmentTime_[currentLevel_ - 1][i] = -1.0;
+			segment_time_[current_level_ - 1][i] = -1.0;
 	}
 }
 
@@ -363,37 +363,37 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	if (!isMap)
 		return;
 
-	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &currentLevel_);
+	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &current_level_);
 	char buffer[BUF_SIZE];
 	for (int i = 1; i <= 9; i++) {
 		sprintf_s(buffer, "Sector_%02d", i);
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
 
-		segmentCount_ = i;
+		segment_count_ = i;
 	}
 	
-	for (double& i : segmentTime_[currentLevel_ - 1])
+	for (double& i : segment_time_[current_level_ - 1])
 		i = -1.0;
 
-	this->srTime_ = 0;
+	this->sr_time_ = 0;
 	if (useNativeFontRendering_)
-		title_->SetVisible(enabled_);
+		title_->SetVisible(segment_enabled_);
 	else
-		T_title_->SetVisible(enabled_);
-	panel_->SetVisible(enabled_);
-	background_->SetVisible(enabled_);
+		T_title_->SetVisible(segment_enabled_);
+	panel_->SetVisible(segment_enabled_);
+	background_->SetVisible(segment_enabled_);
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
-	for (int i = 0; i < segmentCount_; i++) {
+	for (int i = 0; i < segment_count_; i++) {
 		if (useNativeFontRendering_)
 		{
-			labels_[i][0]->SetVisible(enabled_);
-			labels_[i][1]->SetVisible(enabled_);
-			labels_[i][2]->SetVisible(enabled_);
+			labels_[i][0]->SetVisible(segment_enabled_);
+			labels_[i][1]->SetVisible(segment_enabled_);
+			labels_[i][2]->SetVisible(segment_enabled_);
 		} else {
-			T_labels_[i][0]->SetVisible(enabled_);
-			T_labels_[i][1]->SetVisible(enabled_);
-			T_labels_[i][2]->SetVisible(enabled_);
+			T_labels_[i][0]->SetVisible(segment_enabled_);
+			T_labels_[i][1]->SetVisible(segment_enabled_);
+			T_labels_[i][2]->SetVisible(segment_enabled_);
 		}
 	}
 	// for (int i = 0; i < _segmentCount; i++)
@@ -408,13 +408,13 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		}
 	}
 	
-	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segmentCount_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 
 	if (!isCustomMap(filename)) {
 		LoadRecordFromConfig();
 	}
-	for (int i = 0; i < segmentCount_; i++) {
-		double time = -1.0 * segmentTime_[currentLevel_ - 1][i] / 1000.0;
+	for (int i = 0; i < segment_count_; i++) {
+		double time = -1.0 * segment_time_[current_level_ - 1][i] / 1000.0;
 		if (time > 0.0) continue;
 		if (time <= 9999.999)
 			sprintf(buffer, "%.3lfs", time);
@@ -434,7 +434,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 void Segment::OnPreExitLevel()
 {
 	std::string str = serialize();
-	props_[16 + currentLevel_]->SetString(str.c_str());
+	props_[16 + current_level_]->SetString(str.c_str());
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -449,9 +449,9 @@ void Segment::OnCheatEnabled(bool enable)
 
 void Segment::OnPreEndLevel()
 {
-	segmentTime_[currentLevel_ - 1][segment_] = srTime_;
+	segment_time_[current_level_ - 1][segment_] = sr_time_;
 	segment_++;
-	props_[16 + currentLevel_]->SetString(serialize().c_str());
+	props_[16 + current_level_]->SetString(serialize().c_str());
 	
 	panel_->SetVisible(false);
 	this->counting_ = false;
@@ -481,20 +481,20 @@ void Segment::OnUnpauseLevel()
 
 void Segment::OnProcess()
 {
-	loopCount_++;
+	loop_count_++;
 
 	if (this->counting_)
-		this->srTime_ += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
+		this->sr_time_ += static_cast<double>(m_bml->GetTimeManager()->GetLastDeltaTime());
 	
 
-	if (enabled_) {
+	if (segment_enabled_) {
 		if (m_bml->IsIngame()) {
-			dutySlices_[loopCount_ % dutySlices_.size()]();
+			duty_slices_[loop_count_ % duty_slices_.size()]();
 
 			if (useNativeFontRendering_) {
-				if (loopCount_ % skipStep_ != 0 || !skipEnabled_) {
+				if (loop_count_ % skip_step_ != 0 || !skip_enabled_) {
 					title_->Process();
-					for (int i = 0; i < segmentCount_; i++) {
+					for (int i = 0; i < segment_count_; i++) {
 						labels_[i][0]->Process();
 						labels_[i][1]->Process();
 						labels_[i][2]->Process();
@@ -508,24 +508,24 @@ void Segment::OnProcess()
 void Segment::OnStartLevel()
 {
 	this->counting_ = false;
-	this->srTime_ = 0;
+	this->sr_time_ = 0;
 	this->segment_ = 0;
 
-	panel_->SetVisible(enabled_);
+	panel_->SetVisible(segment_enabled_);
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
 }
 
 void Segment::OnPreCheckpointReached()
 {
-	for (auto& dutySlice : dutySlices_)
+	for (auto& dutySlice : duty_slices_)
 		dutySlice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
-	if (segmentTime_[currentLevel_ - 1][segment_] < 0.0 || srTime_ < segmentTime_[currentLevel_ - 1][segment_])
+	if (segment_time_[current_level_ - 1][segment_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][segment_])
 		if (!m_bml->IsCheatEnabled())
-			segmentTime_[currentLevel_ - 1][segment_] = srTime_;
+			segment_time_[current_level_ - 1][segment_] = sr_time_;
 
 	this->segment_++;
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
 
-	srTime_ = 0;
+	sr_time_ = 0;
 }

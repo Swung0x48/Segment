@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 4;
+constexpr int SEG_PATCH_VER = 5;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -26,6 +26,7 @@ private:
 	float PANEL_INIT_HEIGHT = 0.0353f;
 
 	static constexpr int BUF_SIZE = 50;
+	static constexpr int PROPS_COUNT = 31;
 
 	char SEG_VERSION[20];
 
@@ -53,7 +54,7 @@ private:
 	bool ITEM_ITALIC = false;
 	bool ITEM_UNDERLINE = false;
 
-	double srTime_ = 0;
+	double sr_time_ = 0;
 	int points_;
 	int segment_ = 0;
 	bool counting_;
@@ -62,21 +63,21 @@ private:
 	BGui::Label* title_ = nullptr;
 	BGui::Panel* panel_ = nullptr;
 	BGui::Panel* background_ = nullptr;
-	int segmentCount_ = 0;
+	int segment_count_ = 0;
 	char text[9][2][BUF_SIZE];
 	BGui::Text* T_labels_[9][3];
 	BGui::Label* labels_[9][3];
-	double segmentTime_[13][9];
-	IProperty* props_[30];
-	int currentLevel_;
+	double segment_time_[13][9];
+	IProperty* props_[PROPS_COUNT];
+	int current_level_;
 	double delta_;
-	char timeString_[BUF_SIZE];
-	char deltaString_[BUF_SIZE];
-	long long loopCount_ = 0;
-	std::vector<std::function<void()>> dutySlices_;
-	bool skipEnabled_ = false;
-	int skipStep_ = 60;
-	bool enabled_ = true;
+	char time_string_[BUF_SIZE];
+	char delta_string_[BUF_SIZE];
+	long long loop_count_ = 0;
+	std::vector<std::function<void()>> duty_slices_;
+	bool skip_enabled_ = false;
+	int skip_step_ = 60;
+	bool segment_enabled_ = true;
 
 	bool isCustomMap(CKSTRING filename)
 	{
@@ -98,9 +99,9 @@ private:
 	{
 		bool isFirst = true;
 		std::stringstream ss;
-		for (int i = 0; i < segmentCount_; i++)
+		for (int i = 0; i < segment_count_; i++)
 		{
-			ss << (isFirst ? "" : ",") << segmentTime_[currentLevel_ - 1][i] / 1000.0;
+			ss << (isFirst ? "" : ",") << segment_time_[current_level_ - 1][i] / 1000.0;
 			isFirst = false;
 		}
 		std::string ret = ss.str();
