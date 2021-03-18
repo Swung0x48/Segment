@@ -351,7 +351,7 @@ void Segment::ClearRecord()
 
 void Segment::LoadRecordFromConfig()
 {
-	std::vector<double> segment_time = split(props_[16 + current_level_]->GetString(), ',');
+	std::vector<double> segment_time = split(props_[17 + current_level_]->GetString(), ',');
 	int valid_segment = (segment_time.size() < segment_count_) ? segment_time.size() : segment_count_;
 	for (int i = 0; i < 9; i++) {
 		if (i < valid_segment)
