@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 7;
+constexpr int SEG_PATCH_VER = 8;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);

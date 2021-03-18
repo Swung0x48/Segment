@@ -528,7 +528,8 @@ void Segment::OnPreCheckpointReached()
 		if (!m_bml->IsCheatEnabled() && update_enabled_)
 			segment_time_[current_level_ - 1][current_sector_] = sr_time_;
 
-	this->current_sector_++;
+	m_bml->GetArrayByName("IngameParameter")->GetElementValue(0, 1, &this->current_sector_);
+	//this->current_sector_++;
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 
 	sr_time_ = 0;
