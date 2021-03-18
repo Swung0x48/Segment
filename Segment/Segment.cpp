@@ -14,12 +14,12 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 	});
 	duty_slices_.push_back([&]() {
 		if (use_native_font_rendering_)
-			labels_[segment_][1]->SetText(time_string_);
+			labels_[current_sector_][1]->SetText(time_string_);
 		else
-			T_labels_[segment_][1]->SetText(time_string_);
+			T_labels_[current_sector_][1]->SetText(time_string_);
 	});
 	duty_slices_.push_back([&]() {
-		double currentTime = segment_time_[current_level_ - 1][segment_];
+		double currentTime = segment_time_[current_level_ - 1][current_sector_];
 		if (currentTime < 0.0) {
 			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 			return;
@@ -43,11 +43,11 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			strcpy(delta_string_, "-9999.999s");
 	});
 	duty_slices_.push_back([&]() {
-		if (segment_time_[current_level_ - 1][segment_] > 0.0) {
+		if (segment_time_[current_level_ - 1][current_sector_] >= 0.0) {
 			if (use_native_font_rendering_)
-				labels_[segment_][2]->SetText(delta_string_);
+				labels_[current_sector_][2]->SetText(delta_string_);
 			else
-				T_labels_[segment_][2]->SetText(delta_string_);
+				T_labels_[current_sector_][2]->SetText(delta_string_);
 		}
 	});
 }
@@ -270,7 +270,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			}
 		}
 		panel_->SetVisible(segment_enabled_ && m_bml->IsIngame());
-		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 		background_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 		for (int i = 0; i < segment_count_; i++)
@@ -387,7 +387,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		T_title_->SetVisible(segment_enabled_);
 	panel_->SetVisible(segment_enabled_);
 	background_->SetVisible(segment_enabled_);
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 	for (int i = 0; i < segment_count_; i++) {
 		if (use_native_font_rendering_)
 		{
@@ -438,7 +438,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 void Segment::OnPreExitLevel()
 {
 	std::string str = serialize();
-	props_[16 + current_level_]->SetString(str.c_str());
+	props_[17 + current_level_]->SetString(str.c_str());
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -453,9 +453,9 @@ void Segment::OnCheatEnabled(bool enable)
 
 void Segment::OnPreEndLevel()
 {
-	segment_time_[current_level_ - 1][segment_] = sr_time_;
-	segment_++;
-	props_[16 + current_level_]->SetString(serialize().c_str());
+	segment_time_[current_level_ - 1][current_sector_] = sr_time_;
+	current_sector_++;
+	props_[17 + current_level_]->SetString(serialize().c_str());
 	
 	panel_->SetVisible(false);
 	this->counting_ = false;
@@ -513,10 +513,10 @@ void Segment::OnStartLevel()
 {
 	this->counting_ = false;
 	this->sr_time_ = 0;
-	this->segment_ = 0;
+	this->current_sector_ = 0;
 
 	panel_->SetVisible(segment_enabled_);
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 }
 
 void Segment::OnPreCheckpointReached()
@@ -524,12 +524,12 @@ void Segment::OnPreCheckpointReached()
 	for (auto& duty_slice : duty_slices_)
 		duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
-	if (segment_time_[current_level_ - 1][segment_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][segment_])
+	if (segment_time_[current_level_ - 1][current_sector_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][current_sector_])
 		if (!m_bml->IsCheatEnabled() && update_enabled_)
-			segment_time_[current_level_ - 1][segment_] = sr_time_;
+			segment_time_[current_level_ - 1][current_sector_] = sr_time_;
 
-	this->segment_++;
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
+	this->current_sector_++;
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 
 	sr_time_ = 0;
 }

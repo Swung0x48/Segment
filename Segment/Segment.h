@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 6;
+constexpr int SEG_PATCH_VER = 7;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -56,7 +56,7 @@ private:
 
 	double sr_time_ = 0;
 	int points_;
-	int segment_ = 0;
+	int current_sector_ = 0;
 	bool counting_;
 	BGui::Gui* gui_ = nullptr;
 	BGui::Text* T_title_ = nullptr;
