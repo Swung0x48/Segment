@@ -42,7 +42,7 @@ private:
 	int LAG_G = 20;
 	int LAG_B = 60;
 	int LAG_A = 200;
-	bool useNativeFontRendering_ = true;
+	bool use_native_font_rendering_ = true;
 	char TITLE_FONT[BUF_SIZE] = "Bank Gothic";
 	int TITLE_FONT_SIZE = 20;
 	int TITLE_FONT_WEIGHT = 500;

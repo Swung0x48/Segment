@@ -13,7 +13,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 			strcpy(time_string_, "9999.999s");
 	});
 	duty_slices_.push_back([&]() {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 			labels_[segment_][1]->SetText(time_string_);
 		else
 			T_labels_[segment_][1]->SetText(time_string_);
@@ -44,7 +44,7 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 	});
 	duty_slices_.push_back([&]() {
 		if (segment_time_[current_level_ - 1][segment_] > 0.0) {
-			if (useNativeFontRendering_)
+			if (use_native_font_rendering_)
 				labels_[segment_][2]->SetText(delta_string_);
 			else
 				T_labels_[segment_][2]->SetText(delta_string_);
@@ -59,7 +59,7 @@ void Segment::RefreshConfig() {
 	sscanf(props_[3]->GetString(), "%d,%d,%d,%d", &LEAD_R, &LEAD_G, &LEAD_B, &LEAD_A);
 	sscanf(props_[4]->GetString(), "%d,%d,%d,%d", &EVEN_R, &EVEN_G, &EVEN_B, &EVEN_A);
 	sscanf(props_[5]->GetString(), "%d,%d,%d,%d", &LAG_R, &LAG_G, &LAG_B, &LAG_A);
-	useNativeFontRendering_ = props_[6]->GetBoolean();
+	use_native_font_rendering_ = props_[6]->GetBoolean();
 	strcpy(TITLE_FONT, props_[7]->GetString());
 	TITLE_FONT_SIZE = props_[8]->GetInteger();
 	TITLE_FONT_WEIGHT = props_[9]->GetInteger();
@@ -83,7 +83,7 @@ void Segment::InitGui()
 	background_->SetZOrder(-1);
 	background_->SetVisible(false);
 
-	if (useNativeFontRendering_)
+	if (use_native_font_rendering_)
 	{
 		title_ = gui_->AddTextLabel("M_Segment_Title", "Segments:", ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS, 0.2f, 0.03f);
 		title_->SetZOrder(10);
@@ -100,7 +100,7 @@ void Segment::InitGui()
 	char labelText[5] = "#1: ";
 	for (int i = 1; i <= 9; i++) {
 		labelText[1] = i + '0';
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			labels_[i - 1][0] = gui_->AddTextLabel("M_Segment_Seg", labelText, ExecuteBB::GAMEFONT_01, TITLE_X_POS, TITLE_Y_POS + TITLE_Y_SHIFT + (float)i * ITEM_Y_SHIFT, 0.2f, 0.03f);
 			labels_[i - 1][0]->SetAlignment(ALIGN_LEFT);
 			labels_[i - 1][0]->SetVisible(false);
@@ -209,14 +209,14 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		LoadRecordFromConfig();
 
 	if (prop == props_[0] && m_bml->IsIngame()) {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 			title_->SetVisible(segment_enabled_);
 		else
 			T_title_->SetVisible(segment_enabled_);
 		panel_->SetVisible(segment_enabled_);
 		background_->SetVisible(segment_enabled_);
 		for (int i = 0; i < segment_count_; i++) {
-			if (useNativeFontRendering_) {
+			if (use_native_font_rendering_) {
 				labels_[i][0]->SetVisible(segment_enabled_);
 				labels_[i][1]->SetVisible(segment_enabled_);
 				labels_[i][2]->SetVisible(segment_enabled_);
@@ -236,7 +236,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		delete panel_;
 		delete background_;
 
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 3; k++) {
 					if (k >= 1)
@@ -255,7 +255,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		}
 		delete gui_;
 		InitGui();
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			for (int j = 0; j < 9; j++) {
 				for (int k = 1; k < 3; k++) {
 					labels_[j][k]->SetText(text[j][k - 1]);
@@ -275,7 +275,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 		for (int i = 0; i < segment_count_; i++)
 		{
-			if (useNativeFontRendering_) {
+			if (use_native_font_rendering_) {
 				title_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 				for (auto* j: labels_[i])
 				{
@@ -292,7 +292,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	}
 
 	for (int i = 7; i <= 11; i++) {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 			break;
 		if (prop == props_[i]) {
 			T_title_->SetFont(TITLE_FONT, TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_ITALIC, TITLE_UNDERLINE);
@@ -301,7 +301,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 	}
 
 	for (int i = 12; i <= 16; i++) {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 			break;
 		if (prop == props_[i]) {
 			for (auto& j: T_labels_) {
@@ -318,12 +318,12 @@ void Segment::OnPreStartMenu() {
 		panel_->SetVisible(false);
 	if (background_ != nullptr)
 		background_->SetVisible(false);
-	if (useNativeFontRendering_)
+	if (use_native_font_rendering_)
 		title_->SetVisible(false);
 	else
 		T_title_->SetVisible(false);
 	for (int i = 1; i <= 9; i++) {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 		{
 			labels_[i - 1][0]->SetVisible(false);
 			labels_[i - 1][1]->SetVisible(false);
@@ -341,7 +341,7 @@ void Segment::ClearRecord()
 	for (int i = 1; i <= 9; i++) {
 		segment_time_[current_level_ - 1][i - 1] = -1;
 
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			labels_[i - 1][2]->SetText("----");
 		} else {
 			T_labels_[i - 1][2]->SetText("----");
@@ -351,11 +351,11 @@ void Segment::ClearRecord()
 
 void Segment::LoadRecordFromConfig()
 {
-	std::vector<double> segmentTime = split(props_[16 + current_level_]->GetString(), ',');
-	int validSegment = (segmentTime.size() < segment_count_) ? segmentTime.size() : segment_count_;
+	std::vector<double> segment_time = split(props_[16 + current_level_]->GetString(), ',');
+	int valid_segment = (segment_time.size() < segment_count_) ? segment_time.size() : segment_count_;
 	for (int i = 0; i < 9; i++) {
-		if (i < validSegment)
-			segment_time_[current_level_ - 1][i] = segmentTime[i] * 1000.0;
+		if (i < valid_segment)
+			segment_time_[current_level_ - 1][i] = segment_time[i] * 1000.0;
 		else
 			segment_time_[current_level_ - 1][i] = -1.0;
 	}
@@ -381,7 +381,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		i = -1.0;
 
 	this->sr_time_ = 0;
-	if (useNativeFontRendering_)
+	if (use_native_font_rendering_)
 		title_->SetVisible(segment_enabled_);
 	else
 		T_title_->SetVisible(segment_enabled_);
@@ -389,7 +389,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	background_->SetVisible(segment_enabled_);
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(segment_) * PANEL_Y_SHIFT));
 	for (int i = 0; i < segment_count_; i++) {
-		if (useNativeFontRendering_)
+		if (use_native_font_rendering_)
 		{
 			labels_[i][0]->SetVisible(segment_enabled_);
 			labels_[i][1]->SetVisible(segment_enabled_);
@@ -403,7 +403,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	// for (int i = 0; i < _segmentCount; i++)
 	// 	_segmentTime[i] = -1.0;
 	for (int i = 1; i <= 9; i++) {
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			labels_[i - 1][1]->SetText("----");
 			labels_[i - 1][2]->SetText("----");
 		} else {
@@ -426,7 +426,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 			strcpy(buffer, "-9999.999s");
 
 		//sprintf(buffer, "%.3lfs", time);
-		if (useNativeFontRendering_) {
+		if (use_native_font_rendering_) {
 			labels_[i][2]->SetText(buffer);
 		}
 		else {
@@ -459,7 +459,7 @@ void Segment::OnPreEndLevel()
 	
 	panel_->SetVisible(false);
 	this->counting_ = false;
-	if (useNativeFontRendering_)
+	if (use_native_font_rendering_)
 		gui_->Process();
 }
 
@@ -495,7 +495,7 @@ void Segment::OnProcess()
 		if (m_bml->IsIngame()) {
 			duty_slices_[loop_count_ % duty_slices_.size()]();
 
-			if (useNativeFontRendering_) {
+			if (use_native_font_rendering_) {
 				if (loop_count_ % skip_step_ != 0 || !skip_enabled_) {
 					title_->Process();
 					for (int i = 0; i < segment_count_; i++) {
@@ -521,8 +521,8 @@ void Segment::OnStartLevel()
 
 void Segment::OnPreCheckpointReached()
 {
-	for (auto& dutySlice : duty_slices_)
-		dutySlice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
+	for (auto& duty_slice : duty_slices_)
+		duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
 	if (segment_time_[current_level_ - 1][segment_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][segment_])
 		if (!m_bml->IsCheatEnabled() && update_enabled_)
