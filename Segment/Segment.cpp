@@ -461,7 +461,9 @@ void Segment::OnGameOver()
 
 void Segment::OnPreEndLevel()
 {
+	double sr_time = sr_time_;
 	OnPreCheckpointReached();
+	sr_time_ = sr_time; // OnPreCheckpointReached() will clear sr_time
 	//segment_time_[current_level_ - 1][current_sector_] = sr_time_;
 	//current_sector_++;
 	if (!is_custom_map)
@@ -505,11 +507,7 @@ void Segment::OnProcess()
 	int next_sector;
 	ingameparameter_array_->GetElementValue(0, 1, &next_sector);
 	if (next_sector <= 0 || next_sector > sector_count_) return; // On restart, level finish or sector not available.
-	if (this->current_sector_ != next_sector - 1 && this->current_sector_ < next_sector) {
-		//for (auto& duty_slice : duty_slices_)
-		//	duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
-		//this->current_sector_ = next_sector - 1;
-		//panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+	if (this->current_sector_ != next_sector - 1 && sector_count_ != current_sector_) {
 		//sr_time_ = 0.0;
 		is_irregular_sector_change = true;
 		OnPreCheckpointReached();
