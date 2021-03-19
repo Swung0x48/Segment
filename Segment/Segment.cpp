@@ -414,10 +414,10 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	
 	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) sector_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 
-	is_custom_map = false;
+	is_custom_map = true;
 	if (!isCustomMap(filename)) {
 		LoadRecordFromConfig();
-		is_custom_map = true;
+		is_custom_map = false;
 	}
 	for (int i = 0; i < sector_count_; i++) {
 		double time = -1.0 * segment_time_[current_level_ - 1][i] / 1000.0;
