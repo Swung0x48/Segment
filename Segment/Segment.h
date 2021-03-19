@@ -3,8 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 2;
-constexpr int SEG_PATCH_VER = 0;
-
+constexpr int SEG_PATCH_VER = 2;
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
 }
@@ -63,7 +62,7 @@ private:
 	BGui::Label* title_ = nullptr;
 	BGui::Panel* panel_ = nullptr;
 	BGui::Panel* background_ = nullptr;
-	int segment_count_ = 0;
+	int sector_count_ = 0;
 	char text[9][2][BUF_SIZE];
 	BGui::Text* T_labels_[9][3];
 	BGui::Label* labels_[9][3];
@@ -79,6 +78,7 @@ private:
 	int skip_step_ = 60;
 	bool segment_enabled_ = true;
 	bool update_enabled_ = true;
+	bool is_irregular_sector_change = false;
 	CKDataArray* ingameparameter_array_ = nullptr;
 
 	bool isCustomMap(CKSTRING filename)
@@ -101,7 +101,7 @@ private:
 	{
 		bool isFirst = true;
 		std::stringstream ss;
-		for (int i = 0; i < segment_count_; i++)
+		for (int i = 0; i < sector_count_; i++)
 		{
 			ss << (isFirst ? "" : ",") << segment_time_[current_level_ - 1][i] / 1000.0;
 			isFirst = false;

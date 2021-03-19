@@ -215,7 +215,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			T_title_->SetVisible(segment_enabled_);
 		panel_->SetVisible(segment_enabled_);
 		background_->SetVisible(segment_enabled_);
-		for (int i = 0; i < segment_count_; i++) {
+		for (int i = 0; i < sector_count_; i++) {
 			if (use_native_font_rendering_) {
 				labels_[i][0]->SetVisible(segment_enabled_);
 				labels_[i][1]->SetVisible(segment_enabled_);
@@ -272,8 +272,8 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		panel_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 		background_->SetVisible(segment_enabled_ && m_bml->IsIngame());
-		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
-		for (int i = 0; i < segment_count_; i++)
+		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)sector_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+		for (int i = 0; i < sector_count_; i++)
 		{
 			if (use_native_font_rendering_) {
 				title_->SetVisible(segment_enabled_ && m_bml->IsIngame());
@@ -352,7 +352,7 @@ void Segment::ClearRecord()
 void Segment::LoadRecordFromConfig()
 {
 	std::vector<double> segment_time = split(props_[17 + current_level_]->GetString(), ',');
-	int valid_segment = (segment_time.size() < segment_count_) ? segment_time.size() : segment_count_;
+	int valid_segment = (segment_time.size() < sector_count_) ? segment_time.size() : sector_count_;
 	for (int i = 0; i < 9; i++) {
 		if (i < valid_segment)
 			segment_time_[current_level_ - 1][i] = segment_time[i] * 1000.0;
@@ -374,7 +374,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
 
-		segment_count_ = i;
+		sector_count_ = i;
 	}
 	
 	for (double& i : segment_time_[current_level_ - 1])
@@ -388,7 +388,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	panel_->SetVisible(segment_enabled_);
 	background_->SetVisible(segment_enabled_);
 	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
-	for (int i = 0; i < segment_count_; i++) {
+	for (int i = 0; i < sector_count_; i++) {
 		if (use_native_font_rendering_)
 		{
 			labels_[i][0]->SetVisible(segment_enabled_);
@@ -412,12 +412,12 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		}
 	}
 	
-	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) segment_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
+	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) sector_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 
 	if (!isCustomMap(filename)) {
 		LoadRecordFromConfig();
 	}
-	for (int i = 0; i < segment_count_; i++) {
+	for (int i = 0; i < sector_count_; i++) {
 		double time = -1.0 * segment_time_[current_level_ - 1][i] / 1000.0;
 		if (time > 0.0) continue;
 		if (time <= 9999.999)
@@ -453,8 +453,9 @@ void Segment::OnCheatEnabled(bool enable)
 
 void Segment::OnPreEndLevel()
 {
-	segment_time_[current_level_ - 1][current_sector_] = sr_time_;
-	current_sector_++;
+	OnPreCheckpointReached();
+	//segment_time_[current_level_ - 1][current_sector_] = sr_time_;
+	//current_sector_++;
 	props_[17 + current_level_]->SetString(serialize().c_str());
 	
 	panel_->SetVisible(false);
@@ -494,14 +495,17 @@ void Segment::OnProcess()
 
 	int next_sector;
 	ingameparameter_array_->GetElementValue(0, 1, &next_sector);
-	if (next_sector == 0) return; // On restart or sector not available.
-	if (this->current_sector_ != next_sector - 1) {
-		sr_time_ = 0.0;
+	if (next_sector <= 0 || next_sector > sector_count_) return; // On restart, level finish or sector not available.
+	if (this->current_sector_ != next_sector - 1 && this->current_sector_ < next_sector) {
+		//for (auto& duty_slice : duty_slices_)
+		//	duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
+		//this->current_sector_ = next_sector - 1;
+		//panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+		//sr_time_ = 0.0;
+		is_irregular_sector_change = true;
+		OnPreCheckpointReached();
+		is_irregular_sector_change = false;
 		this->current_sector_ = next_sector - 1;
-		for (auto& duty_slice : duty_slices_)
-			duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
-		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
-
 	}
 
 	if (segment_enabled_) {
@@ -511,7 +515,7 @@ void Segment::OnProcess()
 			if (use_native_font_rendering_) {
 				if (loop_count_ % skip_step_ != 0 || !skip_enabled_) {
 					title_->Process();
-					for (int i = 0; i < segment_count_; i++) {
+					for (int i = 0; i < sector_count_; i++) {
 						labels_[i][0]->Process();
 						labels_[i][1]->Process();
 						labels_[i][2]->Process();
@@ -534,16 +538,17 @@ void Segment::OnStartLevel()
 
 void Segment::OnPreCheckpointReached()
 {
-	//for (auto& duty_slice : duty_slices_)
-	//	duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
+	for (auto& duty_slice : duty_slices_)
+		duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
-	if (segment_time_[current_level_ - 1][current_sector_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][current_sector_])
-		if (!m_bml->IsCheatEnabled() && update_enabled_)
+	if (segment_time_[current_level_ - 1][current_sector_] < 0.0 || sr_time_ < segment_time_[current_level_ - 1][current_sector_]) // No previous record || Previous record is slower
+		if (!m_bml->IsCheatEnabled() && update_enabled_ && !is_irregular_sector_change)
 			segment_time_[current_level_ - 1][current_sector_] = sr_time_;
 
-	//ingameparameter_array_->GetElementValue(0, 1, &this->current_sector_);
-	//this->current_sector_++;
-	//panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+	ingameparameter_array_->GetElementValue(0, 1, &this->current_sector_);
+	if (is_irregular_sector_change)
+		current_sector_--;
+	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 
-	//sr_time_ = 0;
+	sr_time_ = 0;
 }
