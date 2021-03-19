@@ -2,8 +2,8 @@
 #include <BML/BMLAll.h>
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
-constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 8;
+constexpr int SEG_MINOR_VER = 2;
+constexpr int SEG_PATCH_VER = 0;
 
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
@@ -79,6 +79,7 @@ private:
 	int skip_step_ = 60;
 	bool segment_enabled_ = true;
 	bool update_enabled_ = true;
+	CKDataArray* ingameparameter_array_ = nullptr;
 
 	bool isCustomMap(CKSTRING filename)
 	{
