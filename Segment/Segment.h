@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 2;
-constexpr int SEG_PATCH_VER = 3;
+constexpr int SEG_PATCH_VER = 4;
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
 }
@@ -79,6 +79,7 @@ private:
 	bool segment_enabled_ = true;
 	bool update_enabled_ = true;
 	bool is_irregular_sector_change = false;
+	bool is_custom_map = false;
 	CKDataArray* ingameparameter_array_ = nullptr;
 
 	bool isCustomMap(CKSTRING filename)

@@ -414,8 +414,10 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	
 	background_->SetSize(Vx2DVector(PANEL_WIDTH, (float) sector_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 
+	is_custom_map = false;
 	if (!isCustomMap(filename)) {
 		LoadRecordFromConfig();
+		is_custom_map = true;
 	}
 	for (int i = 0; i < sector_count_; i++) {
 		double time = -1.0 * segment_time_[current_level_ - 1][i] / 1000.0;
@@ -438,7 +440,8 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 void Segment::OnPreExitLevel()
 {
 	std::string str = serialize();
-	props_[17 + current_level_]->SetString(str.c_str());
+	if (!is_custom_map)
+		props_[17 + current_level_]->SetString(str.c_str());
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -461,7 +464,8 @@ void Segment::OnPreEndLevel()
 	OnPreCheckpointReached();
 	//segment_time_[current_level_ - 1][current_sector_] = sr_time_;
 	//current_sector_++;
-	props_[17 + current_level_]->SetString(serialize().c_str());
+	if (!is_custom_map)
+		props_[17 + current_level_]->SetString(serialize().c_str());
 	
 	cursor_->SetVisible(false);
 	this->counting_ = false;
