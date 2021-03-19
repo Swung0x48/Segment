@@ -21,17 +21,17 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 	duty_slices_.push_back([&]() {
 		double currentTime = segment_time_[current_level_ - 1][current_sector_];
 		if (currentTime < 0.0) {
-			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
+			cursor_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 			return;
 		}
 		
 		delta_ = sr_time_ - currentTime;
 		if (delta_ < 0.0)
-			panel_->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
+			cursor_->SetColor(VxColor(LEAD_R, LEAD_G, LEAD_B, LEAD_A));
 		else if (delta_ == 0.0)
-			panel_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
+			cursor_->SetColor(VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A));
 		else
-			panel_->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
+			cursor_->SetColor(VxColor(LAG_R, LAG_G, LAG_B, LAG_A));
 		
 	});
 	duty_slices_.push_back([&]() {
@@ -76,9 +76,9 @@ void Segment::RefreshConfig() {
 void Segment::InitGui()
 {
 	gui_ = new BGui::Gui;
-	panel_ = gui_->AddPanel("M_Segment_Highlight", VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A), TITLE_X_POS, PANEL_INIT_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
-	panel_->SetZOrder(0);
-	panel_->SetVisible(false);
+	cursor_ = gui_->AddPanel("M_Segment_Highlight", VxColor(EVEN_R, EVEN_G, EVEN_B, EVEN_A), TITLE_X_POS, PANEL_INIT_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
+	cursor_->SetZOrder(0);
+	cursor_->SetVisible(false);
 	background_ = gui_->AddPanel("M_Segment_Background", VxColor(0, 0, 0, 50), TITLE_X_POS, TITLE_Y_POS, PANEL_WIDTH, PANEL_HEIGHT);
 	background_->SetZOrder(-1);
 	background_->SetVisible(false);
@@ -213,7 +213,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 			title_->SetVisible(segment_enabled_);
 		else
 			T_title_->SetVisible(segment_enabled_);
-		panel_->SetVisible(segment_enabled_);
+		cursor_->SetVisible(segment_enabled_);
 		background_->SetVisible(segment_enabled_);
 		for (int i = 0; i < sector_count_; i++) {
 			if (use_native_font_rendering_) {
@@ -233,7 +233,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 		delete T_title_;
 		title_ = nullptr;
 		T_title_ = nullptr;
-		delete panel_;
+		delete cursor_;
 		delete background_;
 
 		if (use_native_font_rendering_) {
@@ -269,8 +269,8 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 				}
 			}
 		}
-		panel_->SetVisible(segment_enabled_ && m_bml->IsIngame());
-		panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+		cursor_->SetVisible(segment_enabled_ && m_bml->IsIngame());
+		cursor_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 		background_->SetVisible(segment_enabled_ && m_bml->IsIngame());
 		background_->SetSize(Vx2DVector(PANEL_WIDTH, (float)sector_count_ * PANEL_HEIGHT + PANEL_INIT_HEIGHT));
 		for (int i = 0; i < sector_count_; i++)
@@ -314,8 +314,8 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 }
 
 void Segment::OnPreStartMenu() {
-	if (panel_ != nullptr)
-		panel_->SetVisible(false);
+	if (cursor_ != nullptr)
+		cursor_->SetVisible(false);
 	if (background_ != nullptr)
 		background_->SetVisible(false);
 	if (use_native_font_rendering_)
@@ -385,9 +385,9 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 		title_->SetVisible(segment_enabled_);
 	else
 		T_title_->SetVisible(segment_enabled_);
-	panel_->SetVisible(segment_enabled_);
+	cursor_->SetVisible(segment_enabled_);
 	background_->SetVisible(segment_enabled_);
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+	cursor_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 	for (int i = 0; i < sector_count_; i++) {
 		if (use_native_font_rendering_)
 		{
@@ -451,6 +451,11 @@ void Segment::OnCheatEnabled(bool enable)
 	}
 }
 
+void Segment::OnGameOver()
+{
+	cursor_->SetVisible(false);
+}
+
 void Segment::OnPreEndLevel()
 {
 	OnPreCheckpointReached();
@@ -458,7 +463,7 @@ void Segment::OnPreEndLevel()
 	//current_sector_++;
 	props_[17 + current_level_]->SetString(serialize().c_str());
 	
-	panel_->SetVisible(false);
+	cursor_->SetVisible(false);
 	this->counting_ = false;
 	if (use_native_font_rendering_)
 		gui_->Process();
@@ -532,8 +537,8 @@ void Segment::OnStartLevel()
 	this->sr_time_ = 0;
 	this->current_sector_ = 0;
 
-	panel_->SetVisible(segment_enabled_);
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+	cursor_->SetVisible(segment_enabled_);
+	cursor_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 }
 
 void Segment::OnPreCheckpointReached()
@@ -548,7 +553,7 @@ void Segment::OnPreCheckpointReached()
 	ingameparameter_array_->GetElementValue(0, 1, &this->current_sector_);
 	if (is_irregular_sector_change)
 		current_sector_--;
-	panel_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
+	cursor_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 
 	sr_time_ = 0;
 }

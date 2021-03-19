@@ -3,7 +3,7 @@
 #include <sstream>
 constexpr int SEG_MAJOR_VER = 1;
 constexpr int SEG_MINOR_VER = 2;
-constexpr int SEG_PATCH_VER = 2;
+constexpr int SEG_PATCH_VER = 3;
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
 }
@@ -60,7 +60,7 @@ private:
 	BGui::Gui* gui_ = nullptr;
 	BGui::Text* T_title_ = nullptr;
 	BGui::Label* title_ = nullptr;
-	BGui::Panel* panel_ = nullptr;
+	BGui::Panel* cursor_ = nullptr;
 	BGui::Panel* background_ = nullptr;
 	int sector_count_ = 0;
 	char text[9][2][BUF_SIZE];
@@ -143,5 +143,6 @@ public:
 		XObjectArray* objArray, CKObject* masterObj);
 	virtual void OnPreExitLevel() override;
 	virtual void OnCheatEnabled(bool enable) override;
+	virtual void OnGameOver() override;
 };
 
