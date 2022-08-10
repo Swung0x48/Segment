@@ -362,15 +362,18 @@ void Segment::LoadRecordFromConfig()
 }
 
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
-                           BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
-                           XObjectArray* objArray, CKObject* masterObj) {
+													 BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
+													 XObjectArray* objArray, CKObject* masterObj) {
 	if (!isMap)
 		return;
 	ingameparameter_array_ = m_bml->GetArrayByName("IngameParameter");
 	m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &current_level_);
 	char buffer[BUF_SIZE];
 	for (int i = 1; i <= 9; i++) {
-		sprintf_s(buffer, "Sector_%02d", i);
+		if (i == 9)
+			strcpy_s(buffer, "Sector_9");
+		else
+			sprintf_s(buffer, "Sector_%02d", i);
 		if (m_bml->GetGroupByName(buffer) == nullptr)
 			break;
 
@@ -512,6 +515,7 @@ void Segment::OnProcess()
 		is_irregular_sector_change = true;
 		OnPreCheckpointReached();
 		is_irregular_sector_change = false;
+		if (next_sector > 10) next_sector = 10;
 		this->current_sector_ = next_sector - 1;
 	}
 
@@ -545,6 +549,7 @@ void Segment::OnStartLevel()
 
 void Segment::OnPreCheckpointReached()
 {
+	if (current_sector_ >= 9) current_sector_ = 8;
 	for (auto& duty_slice : duty_slices_)
 		duty_slice(); // Refreshes last segment on checkpoint reached. Excluding delta cell.(aka. second column)
 
@@ -555,6 +560,7 @@ void Segment::OnPreCheckpointReached()
 	ingameparameter_array_->GetElementValue(0, 1, &this->current_sector_);
 	if (is_irregular_sector_change)
 		current_sector_--;
+	if (current_sector_ > 9) current_sector_ = 9;
 	cursor_->SetPosition(Vx2DVector(0.0f, PANEL_INIT_Y_POS + static_cast<float>(current_sector_) * PANEL_Y_SHIFT));
 
 	sr_time_ = 0;
