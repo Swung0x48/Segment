@@ -4,7 +4,7 @@
 class PerLevelSegmentState {
 public:
 	PerLevelSegmentState(const size_t segment_count) :
-		segment_time_(segment_count, -1.),
+		segment_time_(segment_count, 0.),
 		segment_time_to_compare_(segment_count, -1.)
 	{}
 
@@ -52,7 +52,7 @@ public:
 		return segment_time_to_compare_[segment];
 	}
 
-	int get_current_segment() {
+	int get_current_segment() const {
 		return current_segment_;
 	}
 
