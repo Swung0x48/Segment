@@ -4,7 +4,16 @@
 class PerLevelSegmentState {
 public:
 	PerLevelSegmentState(const size_t segment_count) :
-		segment_time_(segment_count, 0.) {}
+		segment_time_(segment_count, -1.),
+		segment_time_to_compare_(segment_count, -1.)
+	{}
+
+	PerLevelSegmentState(PerLevelSegmentState&& other) noexcept:
+		is_counting_(other.is_counting_),
+		current_segment_(other.current_segment_),
+		segment_time_(std::move(other.segment_time_)) {
+
+	}
 
 	void enable_counting(bool enabled) {
 		is_counting_ = enabled;
@@ -13,6 +22,10 @@ public:
 	void update(const float dt) {
 		if (!is_counting_) return;
 		segment_time_[current_segment_] += dt;
+	}
+
+	void save_for_compare() {
+		segment_time_to_compare_ = segment_time_;
 	}
 
 	void reset() {
@@ -33,6 +46,10 @@ public:
 public:
 	float& segment(const size_t segment) {
 		return segment_time_[segment];
+	}
+
+	float& segment_to_compare(const size_t segment) {
+		return segment_time_to_compare_[segment];
 	}
 
 	int get_current_segment() {
@@ -56,5 +73,6 @@ private:
 	bool is_counting_ = false;
 	int current_segment_ = 0;
 	std::vector<float> segment_time_;
+	std::vector<float> segment_time_to_compare_;
 };
 

@@ -1,5 +1,6 @@
 #include "Segment.h"
 #include "CommandSeg.h"
+#include <iostream>
 
 IMod* BMLEntry(IBML* bml) {
 	return new Segment(bml);
@@ -24,16 +25,24 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 													 XObjectArray* objArray, CKObject* masterObj) {
 	if (!isMap)
 		return;
-	//const int current_level = get_current_level();
+	const int current_level = get_current_level();
 	const int sector_count = get_sector_count();
 
 	// TODO: S/L states
-	state_ = std::make_unique<PerLevelSegmentState>(sector_count);
-	gui_ = std::make_unique<SegmentGui>(*state_, get_current_level());
+	//state_ = std::make_unique<PerLevelSegmentState>(sector_count);
+	//gui_ = std::make_unique<SegmentGui>(*state_, get_current_level());
+	
+
+	if (sessions_.find(filename) == sessions_.end()) {
+		sessions_[filename] = std::make_shared<session>(get_current_level(), get_sector_count());
+	}
+	session_ = sessions_[filename];
+	session_->gui.set_cursor_visible(true);
 }
 
 void Segment::OnPreExitLevel()
 {
+	session_->state.save_for_compare();
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -42,47 +51,50 @@ void Segment::OnCheatEnabled(bool enable)
 
 void Segment::OnGameOver()
 {
-
+	session_->gui.set_cursor_visible(false);
 }
 
 void Segment::OnPreEndLevel()
 {
+	session_->gui.set_cursor_visible(false);
+	session_->state.save_for_compare();
 }
 
 void Segment::OnCounterActive()
 {
-	state_->enable_counting(true);
+	session_->state.enable_counting(true);
 }
 
 void Segment::OnCounterInactive()
 {	
-	state_->enable_counting(false);
+	session_->state.enable_counting(false);
 }
 
 void Segment::OnPauseLevel()
 {
-	state_->enable_counting(false);
+	session_->state.enable_counting(false);
 }
 
 void Segment::OnUnpauseLevel()
 {
-	state_->enable_counting(true);
+	session_->state.enable_counting(true);
 }
 
 void Segment::OnProcess()
 {
 	if (!m_bml->IsIngame()) return;
 
-	state_->update(m_bml->GetTimeManager()->GetLastDeltaTime() / 1000.);
-	gui_->update();
+	session_->state.update(m_bml->GetTimeManager()->GetLastDeltaTime() / 1000.);
+	session_->gui.update();
 }
 
 void Segment::OnStartLevel()
 {
-	state_->reset();
+	session_->state.reset();
+	session_->gui.set_cursor_visible(true);
 }
 
 void Segment::OnPostCheckpointReached()
 {
-	state_->change_segment(get_current_sector());
+	session_->state.change_segment(get_current_sector());
 }

@@ -53,8 +53,17 @@ public:
 	virtual void OnGameOver() override;
 private:
 	const std::string SEG_VERSION = std::format("{}.{}.{}", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
-	std::unique_ptr<PerLevelSegmentState> state_;
-	std::unique_ptr<SegmentGui> gui_;
+
+	struct session {
+		session(const int current_level, const int sector_count):
+			state(sector_count), gui(state, current_level) {}
+
+		PerLevelSegmentState state;
+		SegmentGui gui;
+	};
+
+	std::unordered_map<std::string, std::shared_ptr<session>> sessions_;
+	std::shared_ptr<session> session_;
 
 	bool is_custom_map(const std::string_view filename)
 	{
