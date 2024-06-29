@@ -1,0 +1,60 @@
+#pragma once
+#include <vector>
+
+class PerLevelSegmentState {
+public:
+	PerLevelSegmentState(const size_t segment_count) :
+		segment_time_(segment_count, 0.) {}
+
+	void enable_counting(bool enabled) {
+		is_counting_ = enabled;
+	}
+
+	void update(const float dt) {
+		if (!is_counting_) return;
+		segment_time_[current_segment_] += dt;
+	}
+
+	void reset() {
+		is_counting_ = false;
+		current_segment_ = 0;
+		std::fill(segment_time_.begin(), segment_time_.end(), 0.);
+	}
+
+	void reset_segment(const int seg) {
+		segment(seg) = 0.;
+	}
+
+	void change_segment(const int seg) {
+		reset_segment(seg);
+		current_segment_ = seg;
+	}
+
+public:
+	float& segment(const size_t segment) {
+		return segment_time_[segment];
+	}
+
+	int get_current_segment() {
+		return current_segment_;
+	}
+
+	// Iterators
+	using iterator = std::vector<float>::iterator;
+	using const_iterator = std::vector<float>::const_iterator;
+
+	iterator begin() { return segment_time_.begin(); }
+
+	iterator end() { return segment_time_.end(); }
+
+	constexpr const_iterator cbegin() const { return segment_time_.cbegin(); }
+
+	constexpr const_iterator cend() const { return segment_time_.cend(); }
+
+	constexpr size_t size() const { return segment_time_.size(); }
+private:
+	bool is_counting_ = false;
+	int current_segment_ = 0;
+	std::vector<float> segment_time_;
+};
+

@@ -1,90 +1,96 @@
 #pragma once
 #include <BML/BMLAll.h>
+#include <imgui.h>
+#include <vector>
+#include <unordered_map>
+#include <memory>
 #include <sstream>
-constexpr int SEG_MAJOR_VER = 1;
-constexpr int SEG_MINOR_VER = 2;
-constexpr int SEG_PATCH_VER = 7;
+
+#include "PerLevelSegmentState.h"
+#include "SegmentGui.h"
+
+#define m_bml m_BML
+
+constexpr int SEG_MAJOR_VER = 2;
+constexpr int SEG_MINOR_VER = 0;
+constexpr int SEG_PATCH_VER = 0;
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
 }
 
 class Segment: public IMod
 {
+public:
+	typedef const char* CKSTRING;
+	typedef CKBOOL BOOL;
+
+	Segment(IBML* bml);
+	virtual CKSTRING GetID() override { return "Segment"; }
+	virtual CKSTRING GetVersion() override {
+		return SEG_VERSION.c_str(); 
+	}
+	virtual CKSTRING GetName() override { return "Segment"; }
+	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
+	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance split into each segment."; }
+	DECLARE_BML_VERSION;
+
+	virtual void OnLoad() override;
+	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
+	virtual void OnPreStartMenu() override;
+	virtual void OnPreEndLevel() override;
+	virtual void OnCounterActive() override;
+	virtual void OnCounterInactive() override;
+	virtual void OnPauseLevel() override;
+	virtual void OnUnpauseLevel() override;
+	virtual void OnProcess() override;
+	virtual void OnStartLevel() override;
+	virtual void OnPostCheckpointReached() override;
+	virtual void OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
+		BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
+		XObjectArray* objArray, CKObject* masterObj);
+	virtual void OnPreExitLevel() override;
+	virtual void OnCheatEnabled(bool enable) override;
+	virtual void OnGameOver() override;
 private:
-	static constexpr float TITLE_X_POS = 0.0f; // Title position (Segments)
-	static constexpr float TITLE_Y_POS = 0.05f;
-	static constexpr float PANEL_INIT_Y_POS = 0.085f; // Panel position (highlight background)
+	const std::string SEG_VERSION = std::format("{}.{}.{}", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
+	std::unique_ptr<PerLevelSegmentState> state_;
+	std::unique_ptr<SegmentGui> gui_;
 
-	static constexpr float TITLE_Y_SHIFT = 0.01f; // Between title & first row
-	static constexpr float ITEM_Y_SHIFT = 0.03f; // Between rows
-	static constexpr float TITLE_X_SHIFT = 0.02f; // Between heading (#n) & first col
-	static constexpr float ITEM_X_SHIFT = 0.14f; // Between cols
-	static constexpr float PANEL_Y_SHIFT = 0.03f; // Panel movement
-	static constexpr float PANEL_WIDTH = 0.35f;
-	static constexpr float PANEL_HEIGHT = 0.03f;
-	float PANEL_INIT_HEIGHT = 0.0353f;
-
-	static constexpr int BUF_SIZE = 50;
-	static constexpr int PROPS_COUNT = 31;
-
-	char SEG_VERSION[20];
-
-	int LEAD_R = 50;
-	int LEAD_G = 205;
-	int LEAD_B = 50;
-	int LEAD_A = 200;
-	int EVEN_R = 255;
-	int EVEN_G = 168;
-	int EVEN_B = 0;
-	int EVEN_A = 200;
-	int LAG_R = 220;
-	int LAG_G = 20;
-	int LAG_B = 60;
-	int LAG_A = 200;
-	bool use_native_font_rendering_ = true;
-	char TITLE_FONT[BUF_SIZE] = "Bank Gothic";
-	int TITLE_FONT_SIZE = 20;
-	int TITLE_FONT_WEIGHT = 500;
-	bool TITLE_ITALIC = false;
-	bool TITLE_UNDERLINE = false;
-	char ITEM_FONT[BUF_SIZE] = "Bank Gothic";
-	int ITEM_FONT_SIZE = 15;
-	int ITEM_FONT_WEIGHT = 500;
-	bool ITEM_ITALIC = false;
-	bool ITEM_UNDERLINE = false;
-
-	double sr_time_ = 0;
-	int points_;
-	int current_sector_ = 0;
-	bool counting_;
-	BGui::Gui* gui_ = nullptr;
-	BGui::Text* T_title_ = nullptr;
-	BGui::Label* title_ = nullptr;
-	BGui::Panel* cursor_ = nullptr;
-	BGui::Panel* background_ = nullptr;
-	int sector_count_ = 0;
-	char text[9][2][BUF_SIZE];
-	BGui::Text* T_labels_[9][3];
-	BGui::Label* labels_[9][3];
-	double segment_time_[13][9];
-	IProperty* props_[PROPS_COUNT];
-	int current_level_;
-	double delta_;
-	char time_string_[BUF_SIZE];
-	char delta_string_[BUF_SIZE];
-	long long loop_count_ = 0;
-	std::vector<std::function<void()>> duty_slices_;
-	bool skip_enabled_ = false;
-	int skip_step_ = 60;
-	bool segment_enabled_ = true;
-	bool update_enabled_ = true;
-	bool is_irregular_sector_change = false;
-	bool is_custom_map = false;
-	CKDataArray* ingameparameter_array_ = nullptr;
-
-	bool isCustomMap(CKSTRING filename)
+	bool is_custom_map(const std::string_view filename)
 	{
-		return std::string(filename).substr(0, 18) == R"(..\ModLoader\Maps\)";
+		return filename.substr(0, 18) == R"(..\ModLoader\Maps\)";
+	}
+
+	const int get_current_level() {
+		int ret = 0;
+		m_bml->GetArrayByName("CurrentLevel")->GetElementValue(0, 0, &ret);
+		return ret;
+	}
+
+	const int get_current_sector() {
+		int next_sector;
+		CKDataArray* ingameparameter_array = m_bml->GetArrayByName("IngameParameter");
+		ingameparameter_array->GetElementValue(0, 1, &next_sector);
+		return next_sector - 1;
+	}
+
+	// TODO: more elegant way to retrieve sector groups
+	const int get_sector_count() {
+		std::string name;
+		
+		int sector_count = 0;
+		for (int i = 1; i <= 9; i++) {
+			if (i == 9)
+				name = "Sector_9";
+			else
+				name = std::format("Sector_{:02d}", i);
+			
+			if (m_bml->GetGroupByName(name.c_str()) == nullptr)
+				break;
+
+			sector_count = i;
+		}
+		return sector_count;
 	}
 
 	std::vector<double> split(const std::string& s, const char delim = ' ') {
@@ -98,52 +104,5 @@ private:
 		return vec;
 	}
 
-	std::string serialize()
-	{
-		bool isFirst = true;
-		std::stringstream ss;
-		for (int i = 0; i < sector_count_; i++)
-		{
-			ss << (isFirst ? "" : ",") << segment_time_[current_level_ - 1][i] / 1000.0;
-			isFirst = false;
-		}
-		std::string ret = ss.str();
-		return ret;
-	}
-public:
-	Segment(IBML* bml);
-	virtual CKSTRING GetID() override { return "Segment"; }
-	virtual CKSTRING GetVersion() override { 
-		sprintf(SEG_VERSION, "%d.%d.%d", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
-		return SEG_VERSION; 
-	}
-	virtual CKSTRING GetName() override { return "Segment"; }
-	virtual CKSTRING GetAuthor() override { return "Swung0x48"; }
-	virtual CKSTRING GetDescription() override { return "A mod to display your gameplay performance split into each segment."; }
-	DECLARE_BML_VERSION;
-
-	void RefreshConfig();
-	void InitGui();
-
-	void ClearRecord();
-
-	virtual void OnLoad() override;
-	virtual void OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) override;
-	virtual void OnPreStartMenu() override;
-	void LoadRecordFromConfig();
-	virtual void OnPreEndLevel() override;
-	virtual void OnCounterActive() override;
-	virtual void OnCounterInactive() override;
-	virtual void OnPauseLevel() override;
-	virtual void OnUnpauseLevel() override;
-	virtual void OnProcess() override;
-	virtual void OnStartLevel() override;
-	virtual void OnPreCheckpointReached() override;
-	virtual void OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
-		BOOL addtoscene, BOOL reuseMeshes, BOOL reuseMaterials, BOOL dynamic,
-		XObjectArray* objArray, CKObject* masterObj);
-	virtual void OnPreExitLevel() override;
-	virtual void OnCheatEnabled(bool enable) override;
-	virtual void OnGameOver() override;
 };
 
