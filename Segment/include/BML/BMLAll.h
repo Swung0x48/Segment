@@ -1,21 +1,17 @@
-#pragma once
+#ifndef BMLALL_H
+#define BMLALL_H
 
-#include "Export.h"
-#include "Version.h"
+#include "BML/Defines.h"
 
-#include "virtools/CKAll.h"
+#include "BML/IBML.h"
+#include "BML/ILogger.h"
+#include "BML/ICommand.h"
+#include "BML/IConfig.h"
+#include "BML/IMod.h"
 
-#include "IBML.h"
-#include "ILogger.h"
-#include "ICommand.h"
-#include "IConfig.h"
-#include "IMod.h"
+#include "BML/Gui.h"
+#include "BML/InputHook.h"
+#include "BML/ExecuteBB.h"
+#include "BML/ScriptHelper.h"
 
-#include "Gui.h"
-#include "ExecuteBB.h"
-#include "RegisterBB.h"
-#include "ScriptHelper.h"
-
-#ifdef BML_EXPORTS
-#include "ModLoader.h"
-#endif
+#endif // BMLALL_H

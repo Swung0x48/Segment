@@ -1,7 +1,9 @@
-#pragma once
+#ifndef BML_VERSION_H
+#define BML_VERSION_H
 
-#include "BuildVer.h"
-#define TOSTRING2(arg) #arg
-#define TOSTRING(arg) TOSTRING2(arg)
-#define BML_VERSION TOSTRING(BML_MAJOR_VER) "." TOSTRING(BML_MINOR_VER) "." TOSTRING(BML_BUILD_VER)
-#define BML_RC_VERSION TOSTRING(BML_MAJOR_VER) "." TOSTRING(BML_MINOR_VER) ".0." TOSTRING(BML_BUILD_VER)
+#define BML_MAJOR_VER 0
+#define BML_MINOR_VER 3
+#define BML_PATCH_VER 1
+#define BML_VERSION "0.3.1"
+
+#endif // BML_VERSION_H

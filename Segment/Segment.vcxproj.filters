@@ -21,12 +21,24 @@
     <ClInclude Include="CommandSeg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SegmentGui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PerLevelSegmentState.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Segment.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CommandSeg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SegmentGui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PerLevelSegmentState.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
