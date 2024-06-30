@@ -73,7 +73,12 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<session>> sessions_;
 	std::shared_ptr<session> session_;
 
-	picojson::value serialize_sessions_to_pico() const {
+	enum class serialize_from_t {
+		Current,
+		Target
+	};
+
+	picojson::value serialize_sessions_to_pico(serialize_from_t serialize_from = serialize_from_t::Target) const {
 		picojson::array records;
 		for (const auto& [path, session] : sessions_) {
 			picojson::object map_obj;
@@ -81,9 +86,21 @@ private:
 			picojson::object level_obj;
 			picojson::array arr;
 			const auto& state = session->state;
-			for (size_t i = 0; i < state.size(); ++i) {
-				arr.emplace_back(state.segment_to_compare(i));
+			switch (serialize_from) {
+			case serialize_from_t::Target:
+				for (size_t i = 0; i < state.size(); ++i) {
+					arr.emplace_back(state.segment_target(i));
+				}
+				break;
+			case serialize_from_t::Current:
+				for (size_t i = 0; i < state.size(); ++i) {
+					arr.emplace_back(state.segment(i));
+				}
+				break;
+			default:
+				assert(false);
 			}
+			
 			level_obj.emplace("name", session->gui.current_level_name_);
 			level_obj.emplace("segments", arr);
 			map_obj.emplace(path, level_obj);
@@ -162,7 +179,7 @@ private:
 				sessions_[i->first] = std::make_shared<session>(name, arr.size());
 				auto& state = sessions_[i->first]->state;
 				for (size_t i = 0; i < state.size(); ++i) {
-					state.segment_to_compare(i) = arr[i].get<double>();
+					state.segment_target(i) = arr[i].get<double>();
 				}
 			}
 		}
@@ -218,5 +235,6 @@ private:
 		return vec;
 	}
 
+	std::vector<std::function<void()>> queued_tasks_;
 };
 

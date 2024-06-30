@@ -4,6 +4,13 @@
 
 void SegmentGui::update()
 {
+	/*ImGuiStyle style;
+	ImGui::StyleColorsLight(&style);
+	ImVec4 col = style.Colors[ImGuiCol_WindowBg];
+	col.w = 0.5f;
+	ImGui::ShowDemoWindow();*/
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, bg_color);
+
 	ImGui::Begin("Segments", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing);
 	{
 		ImGui::Text(current_level_name_.c_str());
@@ -25,7 +32,7 @@ void SegmentGui::update()
 				const auto time = state_.segment(i);
 				ImGui::Text("%.3fs", time);
 				ImGui::TableSetColumnIndex(2);
-				auto& time_to_compare = state_.segment_to_compare(i);
+				auto& time_to_compare = state_.segment_target(i);
 				ImGui::PushItemWidth(-1);
 				ImGui::DragFloat(std::format("##seg{}", i).c_str(), &time_to_compare, 
 					0.1f, 0.0f, 1e6f, 
@@ -53,11 +60,13 @@ void SegmentGui::update()
 			ImGui::EndTable();
 		}
 		
-
-
-		if (ImGui::Button("Clear History"))
-			state_.clear_history();
-		ImGui::Checkbox("Update History", &state_.is_saving_);
+		if (ImGui::TreeNode("History Settings")) {
+			if (ImGui::Button("Clear History"))
+				state_.clear_history();
+			ImGui::Checkbox("Update History", &state_.is_saving_);
+			ImGui::TreePop();
+		}
 	}
 	ImGui::End();
+	ImGui::PopStyleColor();
 }

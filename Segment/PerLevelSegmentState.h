@@ -25,7 +25,7 @@ public:
 		segment_time_[current_segment_] += dt;
 	}
 
-	void save_for_compare() {
+	void update_target_figures() {
 		if (!is_saving_)
 			return;
 		//std::copy(segment_time_.begin(), segment_time_.begin() + current_segment_, segment_time_to_compare_.begin());
@@ -36,7 +36,7 @@ public:
 	}
 
 	void reset() {
-		save_for_compare();
+		update_target_figures();
 		is_counting_ = false;
 		current_segment_ = 0;
 		std::fill(segment_time_.begin(), segment_time_.end(), 0.);
@@ -51,7 +51,10 @@ public:
 	}
 
 	void change_segment(const int seg) {
-		reset_segment(seg);
+		if (0 < seg && seg < size())
+			reset_segment(seg);
+		else
+			enable_counting(false);
 		current_segment_ = seg;
 	}
 
@@ -60,7 +63,7 @@ public:
 		return segment_time_[segment];
 	}
 
-	float& segment_to_compare(const size_t segment) {
+	float& segment_target(const size_t segment) {
 		return segment_time_to_compare_[segment];
 	}
 
@@ -68,7 +71,7 @@ public:
 		return segment_time_[segment];
 	}
 
-	const float& segment_to_compare(const size_t segment) const {
+	const float& segment_target(const size_t segment) const {
 		return segment_time_to_compare_[segment];
 	}
 

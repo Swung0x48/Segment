@@ -11,13 +11,18 @@ Segment::Segment(IBML* bml) : IMod(bml) {
 
 void Segment::OnLoad() {
 	m_bml->RegisterCommand(new CommandSeg(this));
+
+	load_sessions_from_file();
 }
 
 void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 }
 
 void Segment::OnPreStartMenu() {
-	load_sessions_from_file();
+	for (auto& t : queued_tasks_) {
+		t();
+	}
+	queued_tasks_.clear();
 }
 
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
@@ -49,8 +54,10 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 
 void Segment::OnPreExitLevel()
 {
-	session_->state.save_for_compare();
 	save_pico_to_file(serialize_sessions_to_pico());
+	queued_tasks_.emplace_back([s = session_]() {
+		s->state.update_target_figures();
+	});
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -65,8 +72,10 @@ void Segment::OnGameOver()
 void Segment::OnPreEndLevel()
 {
 	session_->gui.set_cursor_visible(false);
-	session_->state.save_for_compare();
-	save_pico_to_file(serialize_sessions_to_pico());
+	session_->state.enable_counting(false);
+	session_->state.change_segment(get_current_sector() + 1);
+	//session_->state.update_target_figures();
+	save_pico_to_file(serialize_sessions_to_pico(serialize_from_t::Current));
 }
 
 void Segment::OnCounterActive()
