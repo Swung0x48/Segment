@@ -10,6 +10,12 @@ void SegmentGui::update()
 
 		ImGui::BeginTable("##Segments", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg);
 		{
+			ImGui::TableSetupColumn("#Segment");
+			ImGui::TableSetupColumn("Current");
+			ImGui::TableSetupColumn("Target");
+			ImGui::TableSetupColumn("Delta");
+
+			ImGui::TableHeadersRow();
 			for (size_t i = 0; i < state_.size(); ++i) {
 				ImGui::TableNextRow();
 
@@ -19,11 +25,15 @@ void SegmentGui::update()
 				const auto time = state_.segment(i);
 				ImGui::Text("%.3fs", time);
 				ImGui::TableSetColumnIndex(2);
-				const auto time_to_compare = state_.segment_to_compare(i);
-				if (time_to_compare < 0.f)
+				auto& time_to_compare = state_.segment_to_compare(i);
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::DragFloat(std::format("##seg{}", i).c_str(), &time_to_compare, 
+					0.1f, 0.0f, 1e6f, 
+					(time_to_compare >= 0.f) ? "%.3fs" : "----");
+				/*if (time_to_compare < 0.f)
 					ImGui::Text("----");
 				else
-					ImGui::Text("%.3fs", time_to_compare);
+					ImGui::Text("%.3fs", time_to_compare);*/
 				ImGui::TableSetColumnIndex(3);
 				if (time_to_compare < 0.f)
 					ImGui::Text("----");
@@ -41,6 +51,11 @@ void SegmentGui::update()
 			}
 		}
 		ImGui::EndTable();
+
+
+		if (ImGui::Button("Clear History"))
+			state_.clear_history();
+		ImGui::Checkbox("Update History", &state_.is_saving_);
 	}
 	ImGui::End();
 }

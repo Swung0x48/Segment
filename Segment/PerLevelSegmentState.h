@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <algorithm>
 
 class PerLevelSegmentState {
 public:
@@ -25,13 +26,24 @@ public:
 	}
 
 	void save_for_compare() {
-		std::copy(segment_time_.begin(), segment_time_.begin() + current_segment_, segment_time_to_compare_.begin());
+		if (!is_saving_)
+			return;
+		//std::copy(segment_time_.begin(), segment_time_.begin() + current_segment_, segment_time_to_compare_.begin());
+		for (size_t i = 0; i < current_segment_; ++i) {
+			if (segment_time_[i] > 0 && (segment_time_[i] < segment_time_to_compare_[i] || segment_time_to_compare_[i] < 0))
+				segment_time_to_compare_[i] = segment_time_[i];
+		}
 	}
 
 	void reset() {
+		save_for_compare();
 		is_counting_ = false;
 		current_segment_ = 0;
 		std::fill(segment_time_.begin(), segment_time_.end(), 0.);
+	}
+
+	void clear_history() {
+		std::fill(segment_time_to_compare_.begin(), segment_time_to_compare_.end(), -1.);
 	}
 
 	void reset_segment(const int seg) {
@@ -77,6 +89,8 @@ public:
 	constexpr const_iterator cend() const { return segment_time_.cend(); }
 
 	constexpr size_t size() const { return segment_time_.size(); }
+
+	bool is_saving_ = true;
 private:
 	bool is_counting_ = false;
 	int current_segment_ = 0;
