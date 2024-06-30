@@ -25,7 +25,7 @@ public:
 	}
 
 	void save_for_compare() {
-		segment_time_to_compare_ = segment_time_;
+		std::copy(segment_time_.begin(), segment_time_.begin() + current_segment_, segment_time_to_compare_.begin());
 	}
 
 	void reset() {
@@ -49,6 +49,14 @@ public:
 	}
 
 	float& segment_to_compare(const size_t segment) {
+		return segment_time_to_compare_[segment];
+	}
+
+	const float& segment(const size_t segment) const {
+		return segment_time_[segment];
+	}
+
+	const float& segment_to_compare(const size_t segment) const {
 		return segment_time_to_compare_[segment];
 	}
 

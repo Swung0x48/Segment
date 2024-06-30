@@ -5,9 +5,13 @@
 #include <unordered_map>
 #include <memory>
 #include <sstream>
+#include <fstream>
+#include <filesystem>
 
 #include "PerLevelSegmentState.h"
 #include "SegmentGui.h"
+
+#include <picojson.h>
 
 #define m_bml m_BML
 
@@ -53,10 +57,14 @@ public:
 	virtual void OnGameOver() override;
 private:
 	const std::string SEG_VERSION = std::format("{}.{}.{}", SEG_MAJOR_VER, SEG_MINOR_VER, SEG_PATCH_VER);
+	const static inline std::string RECORD_SAVE_PATH = "../ModLoader/Configs/SegmentRecords.json";
 
 	struct session {
 		session(const int current_level, const int sector_count):
 			state(sector_count), gui(state, current_level) {}
+
+		session(const std::string_view current_level_name, const int sector_count) :
+			state(sector_count), gui(state, current_level_name) {}
 
 		PerLevelSegmentState state;
 		SegmentGui gui;
@@ -65,9 +73,106 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<session>> sessions_;
 	std::shared_ptr<session> session_;
 
+	picojson::value serialize_sessions_to_pico() const {
+		picojson::array records;
+		for (const auto& [path, session] : sessions_) {
+			picojson::object map_obj;
+
+			picojson::object level_obj;
+			picojson::array arr;
+			const auto& state = session->state;
+			for (size_t i = 0; i < state.size(); ++i) {
+				arr.emplace_back(state.segment_to_compare(i));
+			}
+			level_obj.emplace("name", session->gui.current_level_name_);
+			level_obj.emplace("segments", arr);
+			map_obj.emplace(path, level_obj);
+
+			records.emplace_back(map_obj);
+		}
+		picojson::value v(records);
+		return v;
+	}
+
+	void save_pico_to_file(const picojson::value& v) const {
+		//std::string path = (std::filesystem::current_path() / RECORD_SAVE_PATH).lexically_normal().string();
+		std::ofstream fs(RECORD_SAVE_PATH, std::ios::trunc);
+		std::string str = v.serialize();
+		fs << str;
+		fs.close();
+	}
+
+	bool load_sessions_from_file() {
+		picojson::value v;
+		std::ifstream fs(RECORD_SAVE_PATH);
+		fs >> v;
+		std::string err = picojson::get_last_error();
+		if (!err.empty()) {
+			GetLogger()->Warn("Error loading sessions from file.");
+			GetLogger()->Warn(err.c_str());
+
+			sessions_.clear();
+			return false;
+		}
+
+		if (!v.is<picojson::array>()) {
+			GetLogger()->Error("Outermost array in illegal form.");
+
+			sessions_.clear();
+			return false;
+		}
+		picojson::array records = v.get<picojson::array>();
+
+		for (const auto& record : records) {
+			if (!record.is<picojson::object>()) {
+				GetLogger()->Error("Record object in illegal form.");
+
+				sessions_.clear();
+				return false;
+			}
+			picojson::object map_obj = record.get<picojson::object>();
+
+			for (picojson::value::object::const_iterator i = map_obj.begin();
+				i != map_obj.end();
+				++i) {
+				if (!i->second.is<picojson::object>()) {
+					GetLogger()->Error("Level object in illegal form.");
+
+					sessions_.clear();
+					return false;
+				}
+				picojson::object obj = i->second.get<picojson::object>();
+
+				if (!obj.contains("name") || !obj["name"].is<std::string>()) {
+					GetLogger()->Error("Level object does not have \'name\' field.");
+
+					sessions_.clear();
+					return false;
+				}
+				std::string name = obj["name"].get<std::string>();
+
+				if (!obj.contains("segments") || !obj["segments"].is<picojson::array>()) {
+					GetLogger()->Error("Level object does not have \'segments\' field.");
+
+					sessions_.clear();
+					return false;
+				}
+				const auto& arr = obj["segments"].get<picojson::array>();
+
+				sessions_[i->first] = std::make_shared<session>(name, arr.size());
+				auto& state = sessions_[i->first]->state;
+				for (size_t i = 0; i < state.size(); ++i) {
+					state.segment_to_compare(i) = arr[i].get<double>();
+				}
+			}
+		}
+
+		return true;
+	}
+
 	bool is_custom_map(const std::string_view filename)
 	{
-		return filename.substr(0, 18) == R"(..\ModLoader\Maps\)";
+		return filename.substr(0, 11) != "3D Entities";
 	}
 
 	const int get_current_level() {

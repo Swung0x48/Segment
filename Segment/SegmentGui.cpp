@@ -6,7 +6,7 @@ void SegmentGui::update()
 {
 	ImGui::Begin("Segments", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing);
 	{
-		ImGui::Text("Level %d", current_level_);
+		ImGui::Text(current_level_name_.c_str());
 
 		ImGui::BeginTable("##Segments", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg);
 		{

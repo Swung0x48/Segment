@@ -1,18 +1,23 @@
 #pragma once
 #include "PerLevelSegmentState.h"
-
+#include <format>
 #include <imgui.h>
 
 class SegmentGui {
 public:
 	SegmentGui(PerLevelSegmentState& state, const int level) :
-		state_(state), current_level_(level) {}
+		state_(state), 
+		current_level_name_(std::format("Level {}", level)) {}
+
+	SegmentGui(PerLevelSegmentState& state, const std::string_view level_name) :
+		state_(state),
+		current_level_name_(level_name) {}
 
 	void update();
 	void set_cursor_visible(bool visible) { cursor_visible_ = visible; }
 
 	PerLevelSegmentState& state_;
-	const int current_level_ = 0;
+	const std::string current_level_name_;
 	bool cursor_visible_ = true;
 
 	const static inline ImU32 lead_color = ImGui::GetColorU32(ImVec4(0.2f, 0.8f, 0.2f, 0.75f));

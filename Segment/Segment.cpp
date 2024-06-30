@@ -17,7 +17,7 @@ void Segment::OnModifyConfig(CKSTRING category, CKSTRING key, IProperty* prop) {
 }
 
 void Segment::OnPreStartMenu() {
-
+	load_sessions_from_file();
 }
 
 void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, CK_CLASSID filterClass,
@@ -32,9 +32,16 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	//state_ = std::make_unique<PerLevelSegmentState>(sector_count);
 	//gui_ = std::make_unique<SegmentGui>(*state_, get_current_level());
 	
+	auto* man = m_bml->GetPathManager();
 
 	if (sessions_.find(filename) == sessions_.end()) {
-		sessions_[filename] = std::make_shared<session>(get_current_level(), get_sector_count());
+		if (!is_custom_map(filename))
+			sessions_[filename] = std::make_shared<session>(get_current_level(), get_sector_count());
+		else {
+			CKPathSplitter splitter(const_cast<char*>(filename));
+			std::string name = std::format("\"{}\"",splitter.GetName());
+			sessions_[filename] = std::make_shared<session>(name, get_sector_count());
+		}
 	}
 	session_ = sessions_[filename];
 	session_->gui.set_cursor_visible(true);
@@ -43,6 +50,7 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 void Segment::OnPreExitLevel()
 {
 	session_->state.save_for_compare();
+	save_pico_to_file(serialize_sessions_to_pico());
 }
 
 void Segment::OnCheatEnabled(bool enable)
@@ -58,6 +66,7 @@ void Segment::OnPreEndLevel()
 {
 	session_->gui.set_cursor_visible(false);
 	session_->state.save_for_compare();
+	save_pico_to_file(serialize_sessions_to_pico());
 }
 
 void Segment::OnCounterActive()
