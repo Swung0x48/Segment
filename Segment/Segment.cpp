@@ -37,15 +37,13 @@ void Segment::OnLoadObject(CKSTRING filename, BOOL isMap, CKSTRING masterName, C
 	//state_ = std::make_unique<PerLevelSegmentState>(sector_count);
 	//gui_ = std::make_unique<SegmentGui>(*state_, get_current_level());
 	
-	auto* man = m_bml->GetPathManager();
-
 	if (sessions_.find(filename) == sessions_.end()) {
 		if (!is_custom_map(filename))
-			sessions_[filename] = std::make_shared<session>(get_current_level(), get_sector_count());
+			sessions_[filename] = std::make_shared<session>(current_level, sector_count);
 		else {
 			CKPathSplitter splitter(const_cast<char*>(filename));
-			std::string name = std::format("\"{}\"",splitter.GetName());
-			sessions_[filename] = std::make_shared<session>(name, get_sector_count());
+			std::string name = std::format("\"{}\"", splitter.GetName());
+			sessions_[filename] = std::make_shared<session>(name, sector_count);
 		}
 	}
 	session_ = sessions_[filename];

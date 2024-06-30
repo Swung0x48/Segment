@@ -17,7 +17,7 @@
 
 constexpr int SEG_MAJOR_VER = 2;
 constexpr int SEG_MINOR_VER = 0;
-constexpr int SEG_PATCH_VER = 0;
+constexpr int SEG_PATCH_VER = 1;
 extern "C" {
 	__declspec(dllexport) IMod* BMLEntry(IBML* bml);
 }
