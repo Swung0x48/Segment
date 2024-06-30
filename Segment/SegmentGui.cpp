@@ -8,12 +8,12 @@ void SegmentGui::update()
 	{
 		ImGui::Text(current_level_name_.c_str());
 
-		ImGui::BeginTable("##Segments", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg);
+		if (ImGui::BeginTable("##Segments", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
 		{
-			ImGui::TableSetupColumn("#Segment");
-			ImGui::TableSetupColumn("Current");
-			ImGui::TableSetupColumn("Target");
-			ImGui::TableSetupColumn("Delta");
+			ImGui::TableSetupColumn("#Segment", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Current", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Target", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Delta", ImGuiTableColumnFlags_WidthStretch);
 
 			ImGui::TableHeadersRow();
 			for (size_t i = 0; i < state_.size(); ++i) {
@@ -26,7 +26,7 @@ void SegmentGui::update()
 				ImGui::Text("%.3fs", time);
 				ImGui::TableSetColumnIndex(2);
 				auto& time_to_compare = state_.segment_to_compare(i);
-				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::PushItemWidth(-1);
 				ImGui::DragFloat(std::format("##seg{}", i).c_str(), &time_to_compare, 
 					0.1f, 0.0f, 1e6f, 
 					(time_to_compare >= 0.f) ? "%.3fs" : "----");
@@ -49,8 +49,10 @@ void SegmentGui::update()
 						ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, lag_color);
 				}
 			}
+
+			ImGui::EndTable();
 		}
-		ImGui::EndTable();
+		
 
 
 		if (ImGui::Button("Clear History"))
