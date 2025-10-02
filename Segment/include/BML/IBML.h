@@ -6,12 +6,12 @@
 #include "CKAll.h"
 
 #include "BML/Defines.h"
-#include "BML/ILogger.h"
+#include "BML/Errors.h"
 #include "BML/ICommand.h"
 #include "BML/IMessageReceiver.h"
+#include "BML/InputHook.h"
 
 class IMod;
-class InputHook;
 
 class BML_EXPORT IBML : public IMessageReceiver {
 public:
@@ -97,7 +97,14 @@ public:
     virtual IMod *FindMod(const char *id) const = 0;
 
     virtual void ExecuteCommand(const char *cmd) = 0;
-};
 
+    virtual int RegisterDependency(IMod *mod, const char *dependencyId, int major, int minor, int patch) = 0;
+    virtual int RegisterOptionalDependency(IMod *mod, const char *dependencyId, int major, int minor, int patch) = 0;
+    virtual int CheckDependencies(IMod *mod) const = 0;
+    virtual int GetDependencyCount(IMod *mod) const = 0;
+    virtual int GetDependencyInfo(IMod *mod, int index, char *dependencyId, int idSize,
+                                  int *major, int *minor, int *patch, int *optional) const = 0;
+    virtual int ClearDependencies(IMod *mod) = 0;
+};
 
 #endif // BML_IBML_H

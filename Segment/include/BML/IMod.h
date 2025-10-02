@@ -6,26 +6,21 @@
 
 #include "CKAll.h"
 
-#include "BML/Defines.h"
-#include "BML/IMessageReceiver.h"
-
-class IMod;
-class IBML;
-class ILogger;
-class ICommand;
-class IConfig;
-class IProperty;
+#include "BML/BML.h"
+#include "BML/IBML.h"
+#include "BML/ILogger.h"
+#include "BML/IConfig.h"
 
 struct BMLVersion {
-    int major, minor, build;
+    int major, minor, patch;
 
-    BMLVersion() : major(BML_MAJOR_VER), minor(BML_MINOR_VER), build(BML_PATCH_VER) {}
-    BMLVersion(int mj, int mn, int bd) : major(mj), minor(mn), build(bd) {}
+    BMLVersion() : major(BML_MAJOR_VERSION), minor(BML_MINOR_VERSION), patch(BML_PATCH_VERSION) {}
+    BMLVersion(int mj, int mn, int bd) : major(mj), minor(mn), patch(bd) {}
 
     bool operator<(const BMLVersion &o) const {
         if (major == o.major) {
             if (minor == o.minor)
-                return build < o.build;
+                return patch < o.patch;
             return minor < o.minor;
         }
         return major < o.major;
@@ -34,10 +29,94 @@ struct BMLVersion {
     bool operator>=(const BMLVersion &o) const {
         return !(*this < o);
     }
+
+    bool operator==(const BMLVersion &o) const {
+        return major == o.major && minor == o.minor && patch == o.patch;
+    }
+
+    std::string ToString() const {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%d.%d.%d", major, minor, patch);
+        return buf;
+    }
 };
 
 #define DECLARE_BML_VERSION \
-    BMLVersion GetBMLVersion() override { return { BML_MAJOR_VER, BML_MINOR_VER, BML_PATCH_VER }; }
+    BMLVersion GetBMLVersion() override { return { BML_MAJOR_VERSION, BML_MINOR_VERSION, BML_PATCH_VERSION }; }
+
+struct ModDependency {
+    char *id;
+    BMLVersion minVersion;
+    int optional; // (0 = required, 1 = optional)
+
+    ModDependency() : id(nullptr), optional(0) {}
+
+    ModDependency(const char *modId, const BMLVersion &version, int isOptional = 0)
+        : minVersion(version), optional(isOptional) {
+        if (modId && strlen(modId) > 0) {
+            size_t len = strlen(modId);
+            id = static_cast<char *>(BML_Malloc(len + 1));
+            if (id) {
+                memcpy(id, modId, len);
+                id[len] = '\0';
+            }
+        } else {
+            id = nullptr;
+        }
+    }
+
+    ModDependency(const ModDependency &other) : minVersion(other.minVersion), optional(other.optional) {
+        if (other.id && strlen(other.id) > 0) {
+            size_t len = strlen(other.id);
+            id = static_cast<char *>(BML_Malloc(len + 1));
+            if (id) {
+                memcpy(id, other.id, len);
+                id[len] = '\0';
+            }
+        } else {
+            id = nullptr;
+        }
+    }
+
+    ModDependency &operator=(const ModDependency &other) {
+        if (this != &other) {
+            if (id) {
+                BML_Free(id);
+                id = nullptr;
+            }
+
+            if (other.id && strlen(other.id) > 0) {
+                size_t len = strlen(other.id);
+                id = static_cast<char *>(BML_Malloc(len + 1));
+                if (id) {
+                    memcpy(id, other.id, len);
+                    id[len] = '\0';
+                }
+            }
+
+            minVersion = other.minVersion;
+            optional = other.optional;
+        }
+        return *this;
+    }
+
+    ~ModDependency() {
+        if (id) {
+            BML_Free(id);
+            id = nullptr;
+        }
+    }
+
+    int operator==(const ModDependency &other) const {
+        if (id == nullptr || other.id == nullptr)
+            return id == other.id;
+        return strcmp(id, other.id) == 0;
+    }
+
+    int operator!=(const ModDependency &other) const {
+        return !(*this == other);
+    }
+};
 
 class BML_EXPORT IMod : public IMessageReceiver {
 public:
@@ -77,6 +156,26 @@ public:
 protected:
     virtual ILogger *GetLogger() final;
     virtual IConfig *GetConfig() final;
+
+    bool AddDependency(const char *modId, const BMLVersion &minVersion = BMLVersion(0, 0, 0)) {
+        return m_BML->RegisterDependency(this, modId, minVersion.major, minVersion.minor, minVersion.patch) == BML_OK;
+    }
+
+    bool AddOptionalDependency(const char *modId, const BMLVersion &minVersion = BMLVersion(0, 0, 0)) {
+        return m_BML->RegisterOptionalDependency(this, modId, minVersion.major, minVersion.minor, minVersion.patch) == BML_OK;
+    }
+
+    bool CheckDependencies() {
+        return m_BML->CheckDependencies(this) != 0;
+    }
+
+    int GetDependencyCount() {
+        return m_BML->GetDependencyCount(this);
+    }
+
+    bool ClearDependencies() {
+        return m_BML->ClearDependencies(this) == BML_OK;
+    }
 
     IBML *m_BML = nullptr;
 
