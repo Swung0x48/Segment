@@ -4,7 +4,7 @@
 
 void SegmentGui::update() {
     if (!visible_)
-        return;
+		return;
 
     ImGui::PushStyleColor(ImGuiCol_WindowBg, bg_color);
 
@@ -13,14 +13,13 @@ void SegmentGui::update() {
         ImGui::PushFont(nullptr, ImGui::GetStyle().FontSizeBase * font_scale_);
     }
 
-    constexpr auto WinFlags = ImGuiWindowFlags_NoTitleBar |
-                           ImGuiWindowFlags_AlwaysAutoResize|
+    constexpr auto WinFlags = ImGuiWindowFlags_AlwaysAutoResize |
                            ImGuiWindowFlags_NoScrollbar |
                            ImGuiWindowFlags_NoFocusOnAppearing |
                            ImGuiWindowFlags_NoBringToFrontOnFocus | 
                            ImGuiWindowFlags_NoNav;
 
-    ImGui::Begin("Segments", nullptr, WinFlags); {
+    ImGui::Begin("Segments", &visible_, WinFlags); {
         ImGui::TextUnformatted(current_level_name_.c_str());
 
         if (ImGui::BeginTable("##Segments", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
@@ -70,7 +69,6 @@ void SegmentGui::update() {
         if (settings_visible_ && ImGui::TreeNode("History Settings")) {
             if (ImGui::Button("Clear History"))
                 state_.clear_history();
-            ImGui::Checkbox("Update History", &state_.is_saving_);
             ImGui::TreePop();
         }
 

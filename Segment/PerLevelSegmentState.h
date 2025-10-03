@@ -86,7 +86,7 @@ public:
     constexpr const_iterator cend() const { return segment_time_.cend(); }
     constexpr size_t size() const { return segment_time_.size(); }
 
-    bool is_saving_ = true;
+    bool is_saving_ = false;
 
 private:
     bool is_counting_ = false;

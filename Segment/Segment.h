@@ -14,7 +14,7 @@
 
 constexpr int SEG_MAJOR_VER = 2;
 constexpr int SEG_MINOR_VER = 1;
-constexpr int SEG_PATCH_VER = 6;
+constexpr int SEG_PATCH_VER = 7;
 
 MOD_EXPORT IMod *BMLEntry(IBML *bml);
 MOD_EXPORT void BMLExit(IMod *mod);
@@ -84,6 +84,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<session>> sessions_;
     std::shared_ptr<session> session_;
     bool cheat_enabled_once_ = false;
+
+    IProperty* show_ = nullptr;
+    IProperty* update_history_ = nullptr;
 
     IProperty *font_scale_ = nullptr;
     IProperty *show_settings_ = nullptr;

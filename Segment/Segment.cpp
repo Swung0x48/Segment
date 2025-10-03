@@ -13,15 +13,27 @@ void BMLExit(IMod *mod) {
 Segment::Segment(IBML *bml) : IMod(bml) {}
 
 void Segment::OnLoad() {
+    GetConfig()->SetCategoryComment("General", "General Settings");
+
+    show_ = GetConfig()->GetProperty("General", "Show");
+    show_->SetComment("Show `Segments` window");
+    show_->SetDefaultBoolean(true);
+
+    update_history_ = GetConfig()->GetProperty("General", "UpdateHistory");
+    update_history_->SetComment("Update history segment time");
+    update_history_->SetDefaultBoolean(true);
+
     GetConfig()->SetCategoryComment("GUI", "GUI Settings");
 
     font_scale_ = GetConfig()->GetProperty("GUI", "FontScale");
     font_scale_->SetComment("The font scale");
     font_scale_->SetDefaultFloat(0.7f);
 
+
     show_settings_ = GetConfig()->GetProperty("GUI", "ShowSettings");
     show_settings_->SetComment("Show settings in window");
     show_settings_->SetDefaultBoolean(false);
+
 
     m_BML->RegisterCommand(new CommandSeg(this));
 
@@ -35,6 +47,12 @@ void Segment::OnModifyConfig(const char *category, const char *key, IProperty *p
 	} else if (prop == show_settings_) {
 		if (session_)
 			session_->gui.set_settings_visible_(show_settings_->GetBoolean());
+	} else if (prop == show_) {
+		if (session_)
+			session_->gui.set_visible(show_->GetBoolean());
+	} else if (prop == update_history_) {
+		if (session_)
+			session_->state.is_saving_ = update_history_->GetBoolean();
 	}
 }
 
